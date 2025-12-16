@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12 - Bloch Sphere Representation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        #canvas-container {
+            height: 700px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #ffd700;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+        
+        .value-display {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-left: 15px;
+            font-family: 'Courier New', monospace;
+            min-width: 100px;
+        }
+        
+        .state-info {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .state-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .preset-btn {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .example-box {
+            background: rgba(135, 206, 235, 0.1);
+            border-left: 4px solid #87ceeb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌐 Bloch Sphere Representation</h1>
+            <p>Visualizing Quantum States in 3D</p>
+        </header>
+        
+        <div id="canvas-container"></div>
+        
+        <div class="controls">
+            <h2>Interactive Bloch Sphere</h2>
+            <p style="margin-bottom: 20px;">Drag to rotate the sphere. Use the sliders to change the quantum state.</p>
+            
+            <div class="control-group">
+                <label>Theta (θ): <span class="value-display" id="theta-val">0.00</span> rad</label>
+                <input type="range" id="theta" min="0" max="3.14159" step="0.01" value="0">
+            </div>
+            
+            <div class="control-group">
+                <label>Phi (φ): <span class="value-display" id="phi-val">0.00</span> rad</label>
+                <input type="range" id="phi" min="0" max="6.28318" step="0.01" value="0">
+            </div>
+            
+            <div class="state-info">
+                <h3>Current State</h3>
+                <div class="state-display" id="state-display">
+                    |ψ⟩ = cos(0.00)|0⟩ + e^(i·0.00)sin(0.00)|1⟩
+                </div>
+                <div class="state-display" id="cartesian-display">
+                    Cartesian: (x=0.000, y=0.000, z=1.000)
+                </div>
+                <div class="state-display" id="prob-display">
+                    P(0) = 1.000, P(1) = 0.000
+                </div>
+            </div>
+            
+            <h3>Preset States</h3>
+            <div class="preset-buttons">
+                <button class="preset-btn" data-theta="0" data-phi="0">|0⟩</button>
+                <button class="preset-btn" data-theta="3.14159" data-phi="0">|1⟩</button>
+                <button class="preset-btn" data-theta="1.5708" data-phi="0">|+⟩</button>
+                <button class="preset-btn" data-theta="1.5708" data-phi="3.14159">|−⟩</button>
+                <button class="preset-btn" data-theta="1.5708" data-phi="1.5708">|i⟩</button>
+                <button class="preset-btn" data-theta="1.5708" data-phi="4.71239">|−i⟩</button>
+            </div>
+        </div>
+        
+        <div class="content-grid">
+            <div class="panel">
+                <h2>Bloch Sphere Definition</h2>
+                <p>The <span class="highlight">Bloch sphere</span> is a geometric representation of a qubit state:</p>
+                
+                <div class="formula">
+                    |ψ⟩ = cos(θ/2)|0⟩ + e^(iφ)sin(θ/2)|1⟩
+                </div>
+                
+                <p>Where:</p>
+                <ul>
+                    <li><strong>θ</strong> (theta): Polar angle [0, π]</li>
+                    <li><strong>φ</strong> (phi): Azimuthal angle [0, 2π]</li>
+                    <li><strong>e^(iφ)</strong>: Complex phase factor</li>
+                </ul>
+                
+                <h3>Cartesian Coordinates</h3>
+                <div class="formula">
+                    x = sin(θ)cos(φ)<br>
+                    y = sin(θ)sin(φ)<br>
+                    z = cos(θ)
+                </div>
+                
+                <div class="example-box">
+                    <h3>Example: |+⟩ State</h3>
+                    <p>θ = π/2, φ = 0</p>
+                    <p>|ψ⟩ = cos(π/4)|0⟩ + sin(π/4)|1⟩</p>
+                    <p>   = (1/√2)(|0⟩ + |1⟩)</p>
+                    <p>Position: (x=1, y=0, z=0)</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Special Points</h2>
+                
+                <h3>North Pole: |0⟩</h3>
+                <p>θ = 0, φ = any</p>
+                <p>Position: (0, 0, 1)</p>
+                
+                <h3>South Pole: |1⟩</h3>
+                <p>θ = π, φ = any</p>
+                <p>Position: (0, 0, −1)</p>
+                
+                <h3>Equator: Superposition States</h3>
+                <p>θ = π/2, φ varies</p>
+                <ul>
+                    <li><strong>|+⟩:</strong> φ = 0, position (1, 0, 0)</li>
+                    <li><strong>|−⟩:</strong> φ = π, position (−1, 0, 0)</li>
+                    <li><strong>|i⟩:</strong> φ = π/2, position (0, 1, 0)</li>
+                    <li><strong>|−i⟩:</strong> φ = 3π/2, position (0, −1, 0)</li>
+                </ul>
+                
+                <div class="example-box">
+                    <h3>Complex Phase on Equator</h3>
+                    <p>All equator states have equal superposition:</p>
+                    <p>|ψ⟩ = (1/√2)(|0⟩ + e^(iφ)|1⟩)</p>
+                    <p>The phase φ determines position on equator!</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Why Complex Numbers?</h2>
+                <p>The Bloch sphere demonstrates why <span class="highlight">complex numbers are essential</span>:</p>
+                
+                <h3>Phase Information</h3>
+                <p>The azimuthal angle φ encodes the relative phase:</p>
+                <div class="formula">
+                    e^(iφ) = cos(φ) + i·sin(φ)
+                </div>
+                <p>This complex phase is crucial for quantum interference!</p>
+                
+                <h3>Full State Space</h3>
+                <p>Without complex numbers:</p>
+                <ul>
+                    <li>Only 2 dimensions (θ only)</li>
+                    <li>Can't represent all quantum states</li>
+                    <li>No interference effects</li>
+                </ul>
+                
+                <p>With complex numbers:</p>
+                <ul>
+                    <li>Full 3D sphere (θ and φ)</li>
+                    <li>All pure qubit states represented</li>
+                    <li>Interference patterns possible</li>
+                </ul>
+                
+                <div class="example-box">
+                    <h3>Example: |+⟩ vs |i⟩</h3>
+                    <p>|+⟩ = (1/√2)(|0⟩ + |1⟩)</p>
+                    <p>|i⟩ = (1/√2)(|0⟩ + i|1⟩)</p>
+                    <p>Same probabilities, different phases!</p>
+                    <p>Without complex numbers, these would be identical!</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Gate Operations</h2>
+                <p>Quantum gates correspond to <span class="highlight">rotations</span> on the Bloch sphere:</p>
+                
+                <h3>Pauli X (Bit Flip)</h3>
+                <p>Rotation by π around X-axis</p>
+                <p>|0⟩ ↔ |1⟩ (north ↔ south)</p>
+                
+                <h3>Pauli Y</h3>
+                <p>Rotation by π around Y-axis</p>
+                <p>Involves complex phase change!</p>
+                
+                <h3>Pauli Z (Phase Flip)</h3>
+                <p>Rotation by π around Z-axis</p>
+                <p>|+⟩ ↔ |−⟩ (east ↔ west)</p>
+                
+                <h3>Hadamard</h3>
+                <p>Rotation by π around (X+Z)/√2 axis</p>
+                <p>|0⟩ ↔ |+⟩, |1⟩ ↔ |−⟩</p>
+                
+                <h3>S Gate (Phase)</h3>
+                <p>Rotation by π/2 around Z-axis</p>
+                <p>|+⟩ → |i⟩ (adds complex phase!)</p>
+                
+                <div class="example-box">
+                    <h3>Example: S Gate on |+⟩</h3>
+                    <p>Initial: |+⟩ at (1, 0, 0)</p>
+                    <p>After S: |i⟩ at (0, 1, 0)</p>
+                    <p>Rotated 90° around Z-axis!</p>
+                    <p>Phase changed from 0 to π/2</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Measurement on Bloch Sphere</h2>
+            
+            <h3>Computational Basis Measurement</h3>
+            <p>Measuring in Z-basis projects onto north or south pole:</p>
+            <div class="formula">
+                P(0) = cos²(θ/2)<br>
+                P(1) = sin²(θ/2)
+            </div>
+            
+            <h3>Other Basis Measurements</h3>
+            <p>Measuring in X-basis (Hadamard basis):</p>
+            <ul>
+                <li>Projects onto east (|+⟩) or west (|−⟩) pole</li>
+                <li>P(+) = (1 + sin(θ)cos(φ))/2</li>
+                <li>P(−) = (1 − sin(θ)cos(φ))/2</li>
+            </ul>
+            
+            <p>Measuring in Y-basis:</p>
+            <ul>
+                <li>Projects onto |i⟩ or |−i⟩</li>
+                <li>P(i) = (1 + sin(θ)sin(φ))/2</li>
+                <li>P(−i) = (1 − sin(θ)sin(φ))/2</li>
+            </ul>
+            
+            <div class="example-box">
+                <h3>Example: Measuring |+⟩</h3>
+                <p>State: θ = π/2, φ = 0</p>
+                <p>Z-basis: P(0) = P(1) = 0.5</p>
+                <p>X-basis: P(+) = 1, P(−) = 0</p>
+                <p>Y-basis: P(i) = P(−i) = 0.5</p>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Quantum Computing Applications</h2>
+            
+            <h3>1. State Visualization</h3>
+            <p>The Bloch sphere provides intuitive visualization of:</p>
+            <ul>
+                <li>Quantum superposition (any point on sphere)</li>
+                <li>Basis states (poles and equator points)</li>
+                <li>State evolution (paths on sphere)</li>
+            </ul>
+            
+            <h3>2. Gate Design</h3>
+            <p>Gates are designed as rotations:</p>
+            <ul>
+                <li>Rx(θ): Rotation around X-axis</li>
+                <li>Ry(θ): Rotation around Y-axis</li>
+                <li>Rz(θ): Rotation around Z-axis</li>
+            </ul>
+            
+            <h3>3. Error Analysis</h3>
+            <p>Errors appear as deviations on the sphere:</p>
+            <ul>
+                <li>Bit flip error: rotation around X</li>
+                <li>Phase flip error: rotation around Z</li>
+                <li>Depolarization: move toward center</li>
+            </ul>
+            
+            <h3>4. Quantum Algorithms</h3>
+            <p>Algorithm steps visualized as sphere rotations:</p>
+            <ul>
+                <li>Initialization: move to north pole</li>
+                <li>Superposition: move to equator</li>
+                <li>Phase manipulation: rotate around Z</li>
+                <li>Interference: combine rotations</li>
+            </ul>
+            
+            <div class="example-box">
+                <h3>Grover's Algorithm Visualization</h3>
+                <p>1. Start at |+⟩ (equal superposition)</p>
+                <p>2. Oracle: rotate around marked state</p>
+                <p>3. Diffusion: rotate toward marked state</p>
+                <p>4. Repeat: spiral toward solution</p>
+                <p>All visualized as rotations on Bloch sphere!</p>
+            </div>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="../11-quantum-gates/index.html" class="btn">← Previous: Quantum Gates</a>
+            <a href="../index.html" class="btn">Home</a>
+            <a href="../13-exercises/index.html" class="btn">Next: Exercises →</a>
+        </div>
+    </div>
+    
+    <script>
+        let scene, camera, renderer, controls;
+        let sphere, stateVector, axes;
+        let theta = 0, phi = 0;
+        
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+            
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(3, 3, 3);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            createBlochSphere();
+            
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const pointLight = new THREE.PointLight(0xffffff, 0.8, 100);
+            pointLight.position.set(10, 10, 10);
+            scene.add(pointLight);
+            
+            setupControls();
+            
+            window.addEventListener('resize', onWindowResize, false);
+            
+            animate();
+        }
+        
+        function createBlochSphere() {
+            // Create transparent sphere
+            const sphereGeometry = new THREE.SphereGeometry(2, 32, 32);
+            const sphereMaterial = new THREE.MeshPhongMaterial({
+                color: 0x4488ff,
+                transparent: true,
+                opacity: 0.2,
+                side: THREE.DoubleSide
+            });
+            sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            scene.add(sphere);
+            
+            // Add wireframe
+            const wireframe = new THREE.WireframeGeometry(sphereGeometry);
+            const line = new THREE.LineSegments(wireframe);
+            line.material.color.setHex(0x4488ff);
+            line.material.opacity = 0.3;
+            line.material.transparent = true;
+            scene.add(line);
+            
+            // Create axes
+            const axisLength = 2.5;
+            
+            // X axis (red)
+            const xGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(-axisLength, 0, 0),
+                new THREE.Vector3(axisLength, 0, 0)
+            ]);
+            const xLine = new THREE.Line(xGeometry, new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 2 }));
+            scene.add(xLine);
+            
+            // Y axis (green)
+            const yGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, -axisLength, 0),
+                new THREE.Vector3(0, axisLength, 0)
+            ]);
+            const yLine = new THREE.Line(yGeometry, new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 2 }));
+            scene.add(yLine);
+            
+            // Z axis (blue)
+            const zGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, -axisLength),
+                new THREE.Vector3(0, 0, axisLength)
+            ]);
+            const zLine = new THREE.Line(zGeometry, new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 2 }));
+            scene.add(zLine);
+            
+            // Add labels
+            addLabel('X', axisLength, 0, 0, 0xff0000);
+            addLabel('Y', 0, axisLength, 0, 0x00ff00);
+            addLabel('Z', 0, 0, axisLength, 0x0000ff);
+            
+            // Add poles
+            addPole('|0⟩', 0, 0, 2, 0x00ffff);
+            addPole('|1⟩', 0, 0, -2, 0xff00ff);
+            
+            // Add equator points
+            addPole('|+⟩', 2, 0, 0, 0xffff00);
+            addPole('|−⟩', -2, 0, 0, 0xff8800);
+            addPole('|i⟩', 0, 2, 0, 0x00ff88);
+            addPole('|−i⟩', 0, -2, 0, 0x8800ff);
+            
+            // Create state vector
+            stateVector = createVector();
+            updateStateVector();
+        }
+        
+        function addLabel(text, x, y, z, color) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 128;
+            canvas.height = 64;
+            context.fillStyle = '#' + color.toString(16).padStart(6, '0');
+            context.font = 'Bold 40px Arial';
+            context.textAlign = 'center';
+            context.fillText(text, 64, 45);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.position.set(x * 1.2, y * 1.2, z * 1.2);
+            sprite.scale.set(0.5, 0.25, 1);
+            scene.add(sprite);
+        }
+        
+        function addPole(text, x, y, z, color) {
+            const sphereGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+            const sphereMaterial = new THREE.MeshPhongMaterial({ color: color });
+            const pole = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            pole.position.set(x, y, z);
+            scene.add(pole);
+        }
+        
+        function createVector() {
+            const group = new THREE.Group();
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, 0, 2)
+            ]);
+            
+            const line = new THREE.Line(
+                geometry,
+                new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 3 })
+            );
+            group.add(line);
+            
+            const coneGeometry = new THREE.ConeGeometry(0.15, 0.4, 16);
+            const coneMaterial = new THREE.MeshPhongMaterial({ color: 0xffff00 });
+            const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+            cone.position.set(0, 0, 2);
+            group.add(cone);
+            
+            scene.add(group);
+            return group;
+        }
+        
+        function setupControls() {
+            const thetaSlider = document.getElementById('theta');
+            const phiSlider = document.getElementById('phi');
+            const thetaDisplay = document.getElementById('theta-val');
+            const phiDisplay = document.getElementById('phi-val');
+            
+            thetaSlider.addEventListener('input', () => {
+                theta = parseFloat(thetaSlider.value);
+                thetaDisplay.textContent = theta.toFixed(2);
+                updateStateVector();
+                updateStateDisplay();
+            });
+            
+            phiSlider.addEventListener('input', () => {
+                phi = parseFloat(phiSlider.value);
+                phiDisplay.textContent = phi.toFixed(2);
+                updateStateVector();
+                updateStateDisplay();
+            });
+            
+            // Preset buttons
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    theta = parseFloat(btn.dataset.theta);
+                    phi = parseFloat(btn.dataset.phi);
+                    thetaSlider.value = theta;
+                    phiSlider.value = phi;
+                    thetaDisplay.textContent = theta.toFixed(2);
+                    phiDisplay.textContent = phi.toFixed(2);
+                    updateStateVector();
+                    updateStateDisplay();
+                });
+            });
+            
+            updateStateDisplay();
+        }
+        
+        function updateStateVector() {
+            const x = 2 * Math.sin(theta) * Math.cos(phi);
+            const y = 2 * Math.sin(theta) * Math.sin(phi);
+            const z = 2 * Math.cos(theta);
+            
+            // Update line
+            const geometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(x, y, z)
+            ]);
+            stateVector.children[0].geometry.dispose();
+            stateVector.children[0].geometry = geometry;
+            
+            // Update cone
+            stateVector.children[1].position.set(x, y, z);
+            stateVector.children[1].lookAt(0, 0, 0);
+            stateVector.children[1].rotateX(Math.PI / 2);
+        }
+        
+        function updateStateDisplay() {
+            const cosHalfTheta = Math.cos(theta / 2);
+            const sinHalfTheta = Math.sin(theta / 2);
+            
+            const stateStr = `|ψ⟩ = ${cosHalfTheta.toFixed(3)}|0⟩ + e^(i·${phi.toFixed(2)})${sinHalfTheta.toFixed(3)}|1⟩`;
+            document.getElementById('state-display').textContent = stateStr;
+            
+            const x = Math.sin(theta) * Math.cos(phi);
+            const y = Math.sin(theta) * Math.sin(phi);
+            const z = Math.cos(theta);
+            
+            const cartesianStr = `Cartesian: (x=${x.toFixed(3)}, y=${y.toFixed(3)}, z=${z.toFixed(3)})`;
+            document.getElementById('cartesian-display').textContent = cartesianStr;
+            
+            const prob0 = cosHalfTheta * cosHalfTheta;
+            const prob1 = sinHalfTheta * sinHalfTheta;
+            
+            const probStr = `P(0) = ${prob0.toFixed(3)}, P(1) = ${prob1.toFixed(3)}`;
+            document.getElementById('prob-display').textContent = probStr;
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
