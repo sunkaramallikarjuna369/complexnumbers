@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>08 - Python Operations with Complex Numbers</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            margin: 15px 0;
+            border-left: 4px solid #ffd700;
+            overflow-x: auto;
+        }
+        
+        .output-block {
+            background: rgba(0, 100, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+            border-left: 4px solid #00ff00;
+        }
+        
+        .example-box {
+            background: rgba(135, 206, 235, 0.1);
+            border-left: 4px solid #87ceeb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐍 Python Operations with Complex Numbers</h1>
+            <p>NumPy and Python for Quantum Computing</p>
+        </header>
+        
+        <div class="content-grid">
+            <div class="panel">
+                <h2>Creating Complex Numbers</h2>
+                
+                <h3>Built-in Python</h3>
+                <div class="code-block">
+# Using j for imaginary unit<br>
+z1 = 3 + 4j<br>
+z2 = complex(3, 4)<br>
+<br>
+print(z1)  # (3+4j)<br>
+print(z2)  # (3+4j)
+                </div>
+                
+                <h3>NumPy Arrays</h3>
+                <div class="code-block">
+import numpy as np<br>
+<br>
+# Single complex number<br>
+z = np.complex128(3 + 4j)<br>
+<br>
+# Array of complex numbers<br>
+arr = np.array([1+2j, 3+4j, 5+6j])<br>
+<br>
+# Create from real and imaginary parts<br>
+real = np.array([1, 3, 5])<br>
+imag = np.array([2, 4, 6])<br>
+z_arr = real + 1j*imag
+                </div>
+                
+                <div class="example-box">
+                    <h3>Example Output</h3>
+                    <div class="output-block">
+z = (3+4j)<br>
+arr = [1.+2.j 3.+4.j 5.+6.j]<br>
+z_arr = [1.+2.j 3.+4.j 5.+6.j]
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Basic Operations</h2>
+                
+                <h3>Arithmetic</h3>
+                <div class="code-block">
+z1 = 3 + 4j<br>
+z2 = 1 - 2j<br>
+<br>
+# Addition<br>
+add = z1 + z2  # (4+2j)<br>
+<br>
+# Multiplication<br>
+mult = z1 * z2  # (11-2j)<br>
+<br>
+# Division<br>
+div = z1 / z2  # (-1+2j)<br>
+<br>
+# Power<br>
+power = z1 ** 2  # (-7+24j)
+                </div>
+                
+                <h3>Conjugate and Magnitude</h3>
+                <div class="code-block">
+z = 3 + 4j<br>
+<br>
+# Conjugate<br>
+z_conj = z.conjugate()  # (3-4j)<br>
+z_conj = np.conj(z)     # NumPy version<br>
+<br>
+# Magnitude<br>
+mag = abs(z)            # 5.0<br>
+mag = np.abs(z)         # NumPy version<br>
+<br>
+# Argument (phase)<br>
+phase = np.angle(z)     # 0.927 rad
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>NumPy Functions</h2>
+                
+                <h3>Exponential and Trigonometric</h3>
+                <div class="code-block">
+import numpy as np<br>
+<br>
+# Euler's formula<br>
+theta = np.pi / 4<br>
+z = np.exp(1j * theta)<br>
+# z = (0.707+0.707j)<br>
+<br>
+# Trigonometric<br>
+cos_z = np.cos(1j)      # (1.543+0j)<br>
+sin_z = np.sin(1j)      # (0+1.175j)<br>
+<br>
+# Hyperbolic<br>
+cosh_z = np.cosh(1+1j)  # (0.834+0.988j)<br>
+sinh_z = np.sinh(1+1j)  # (0.635+1.298j)
+                </div>
+                
+                <h3>Array Operations</h3>
+                <div class="code-block">
+# Create array of complex numbers<br>
+z_array = np.array([1+2j, 3+4j, 5+6j])<br>
+<br>
+# Element-wise operations<br>
+z_squared = z_array ** 2<br>
+z_conj = np.conj(z_array)<br>
+z_mag = np.abs(z_array)<br>
+<br>
+# Sum and product<br>
+total = np.sum(z_array)<br>
+product = np.prod(z_array)
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Quantum State Operations</h2>
+                
+                <h3>Creating Quantum States</h3>
+                <div class="code-block">
+import numpy as np<br>
+<br>
+# Basis states<br>
+ket_0 = np.array([1, 0])<br>
+ket_1 = np.array([0, 1])<br>
+<br>
+# Superposition states<br>
+ket_plus = np.array([1, 1]) / np.sqrt(2)<br>
+ket_minus = np.array([1, -1]) / np.sqrt(2)<br>
+<br>
+# Complex superposition<br>
+alpha = 3/5<br>
+beta = 4j/5<br>
+psi = np.array([alpha, beta])<br>
+<br>
+# Verify normalization<br>
+norm = np.sum(np.abs(psi)**2)<br>
+print(f"Normalized: {np.isclose(norm, 1)}")
+                </div>
+                
+                <h3>Inner Products</h3>
+                <div class="code-block">
+# Two quantum states<br>
+psi = np.array([1, 1j]) / np.sqrt(2)<br>
+phi = np.array([1, -1j]) / np.sqrt(2)<br>
+<br>
+# Inner product ⟨ψ|φ⟩<br>
+inner = np.vdot(psi, phi)<br>
+# or<br>
+inner = np.sum(np.conj(psi) * phi)<br>
+<br>
+# Probability of overlap<br>
+prob = np.abs(inner)**2<br>
+print(f"|⟨ψ|φ⟩|² = {prob}")
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Matrix Operations</h2>
+                
+                <h3>Quantum Gates</h3>
+                <div class="code-block">
+import numpy as np<br>
+<br>
+# Pauli matrices<br>
+X = np.array([[0, 1], [1, 0]])<br>
+Y = np.array([[0, -1j], [1j, 0]])<br>
+Z = np.array([[1, 0], [0, -1]])<br>
+<br>
+# Hadamard gate<br>
+H = np.array([[1, 1], [1, -1]]) / np.sqrt(2)<br>
+<br>
+# Phase gates<br>
+S = np.array([[1, 0], [0, 1j]])<br>
+T = np.array([[1, 0], [0, np.exp(1j*np.pi/4)]])<br>
+<br>
+# Apply gate to state<br>
+psi = np.array([1, 0])  # |0⟩<br>
+psi_new = H @ psi       # H|0⟩ = |+⟩
+                </div>
+                
+                <h3>Matrix Properties</h3>
+                <div class="code-block">
+# Hermitian conjugate (dagger)<br>
+H_dag = np.conj(H.T)<br>
+<br>
+# Check if unitary: U†U = I<br>
+is_unitary = np.allclose(H_dag @ H, np.eye(2))<br>
+<br>
+# Eigenvalues and eigenvectors<br>
+eigenvals, eigenvecs = np.linalg.eig(Z)<br>
+<br>
+# Matrix exponential<br>
+theta = np.pi/4<br>
+R_z = np.array([[np.exp(-1j*theta/2), 0],<br>
+                [0, np.exp(1j*theta/2)]])
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Practical Examples</h2>
+                
+                <h3>Example 1: Quantum Interference</h3>
+                <div class="code-block">
+import numpy as np<br>
+<br>
+# Two paths with different phases<br>
+amp1 = 1/np.sqrt(2)<br>
+amp2 = np.exp(1j * np.pi/3) / np.sqrt(2)<br>
+<br>
+# Total amplitude<br>
+total_amp = amp1 + amp2<br>
+<br>
+# Probability<br>
+prob = np.abs(total_amp)**2<br>
+print(f"Probability: {prob:.4f}")
+                </div>
+                
+                <div class="output-block">
+Probability: 0.7500
+                </div>
+                
+                <h3>Example 2: Bell State</h3>
+                <div class="code-block">
+# Create Bell state |Φ+⟩ = (|00⟩ + |11⟩)/√2<br>
+bell_state = np.array([1, 0, 0, 1]) / np.sqrt(2)<br>
+<br>
+# Verify normalization<br>
+norm = np.sum(np.abs(bell_state)**2)<br>
+print(f"Normalized: {np.isclose(norm, 1)}")<br>
+<br>
+# Measure probabilities<br>
+probs = np.abs(bell_state)**2<br>
+print(f"P(00) = {probs[0]:.2f}")<br>
+print(f"P(11) = {probs[3]:.2f}")
+                </div>
+                
+                <div class="output-block">
+Normalized: True<br>
+P(00) = 0.50<br>
+P(11) = 0.50
+                </div>
+                
+                <h3>Example 3: Time Evolution</h3>
+                <div class="code-block">
+# Hamiltonian for two-level system<br>
+E0, E1 = 0, 1<br>
+H = np.diag([E0, E1])<br>
+<br>
+# Initial state<br>
+psi_0 = np.array([1, 1]) / np.sqrt(2)<br>
+<br>
+# Time evolution<br>
+t = np.pi<br>
+U = np.diag([np.exp(-1j*E0*t), np.exp(-1j*E1*t)])<br>
+psi_t = U @ psi_0<br>
+<br>
+# Probabilities<br>
+probs = np.abs(psi_t)**2<br>
+print(f"P(0) = {probs[0]:.4f}")<br>
+print(f"P(1) = {probs[1]:.4f}")
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Complete Quantum Computing Example</h2>
+            
+            <div class="code-block">
+import numpy as np<br>
+<br>
+# Define quantum gates<br>
+H = np.array([[1, 1], [1, -1]]) / np.sqrt(2)<br>
+X = np.array([[0, 1], [1, 0]])<br>
+CNOT = np.array([[1, 0, 0, 0],<br>
+                 [0, 1, 0, 0],<br>
+                 [0, 0, 0, 1],<br>
+                 [0, 0, 1, 0]])<br>
+<br>
+# Create initial state |00⟩<br>
+psi = np.array([1, 0, 0, 0])<br>
+<br>
+# Apply H ⊗ I (Hadamard on first qubit)<br>
+H_I = np.kron(H, np.eye(2))<br>
+psi = H_I @ psi<br>
+print("After H⊗I:", psi)<br>
+<br>
+# Apply CNOT<br>
+psi = CNOT @ psi<br>
+print("After CNOT:", psi)<br>
+<br>
+# Result is Bell state!<br>
+print("Bell state |Φ+⟩ created!")<br>
+<br>
+# Measure probabilities<br>
+probs = np.abs(psi)**2<br>
+print(f"P(00) = {probs[0]:.2f}, P(11) = {probs[3]:.2f}")
+            </div>
+            
+            <div class="output-block">
+After H⊗I: [0.707 0.    0.707 0.   ]<br>
+After CNOT: [0.707 0.    0.    0.707]<br>
+Bell state |Φ+⟩ created!<br>
+P(00) = 0.50, P(11) = 0.50
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Key NumPy Functions Summary</h2>
+            
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr style="background: rgba(255, 215, 0, 0.2);">
+                    <th style="padding: 10px; text-align: left; border: 1px solid rgba(255,255,255,0.2);">Function</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid rgba(255,255,255,0.2);">Description</th>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);"><code>np.conj(z)</code></td>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Complex conjugate</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);"><code>np.abs(z)</code></td>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Magnitude</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);"><code>np.angle(z)</code></td>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Argument (phase)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);"><code>np.exp(z)</code></td>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Exponential</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);"><code>np.vdot(a, b)</code></td>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Inner product</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);"><code>np.kron(A, B)</code></td>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Tensor product</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);"><code>A @ B</code></td>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Matrix multiplication</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);"><code>A.T</code></td>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Transpose</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);"><code>np.conj(A.T)</code></td>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Hermitian conjugate (dagger)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);"><code>np.linalg.eig(A)</code></td>
+                    <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Eigenvalues and eigenvectors</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="../07-quantum-states/index.html" class="btn">← Previous: Quantum States</a>
+            <a href="../index.html" class="btn">Home</a>
+            <a href="../09-probability-amplitudes/index.html" class="btn">Next: Probability Amplitudes →</a>
+        </div>
+    </div>
+</body>
+</html>
