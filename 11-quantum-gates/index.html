@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11 - Quantum Gates with Complex Coefficients</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        #canvas-container {
+            height: 600px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        .gate-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .gate-btn {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .gate-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        
+        .gate-btn.active {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #ffd700;
+        }
+        
+        .state-input {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #ffd700;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+        
+        .value-display {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-left: 15px;
+            font-family: 'Courier New', monospace;
+            min-width: 80px;
+        }
+        
+        .result-box {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .matrix-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .example-box {
+            background: rgba(135, 206, 235, 0.1);
+            border-left: 4px solid #87ceeb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚪 Quantum Gates with Complex Coefficients</h1>
+            <p>Unitary Transformations in Quantum Computing</p>
+        </header>
+        
+        <div id="canvas-container"></div>
+        
+        <div class="controls">
+            <h2>Interactive Quantum Gate Simulator</h2>
+            
+            <div class="gate-selector">
+                <button class="gate-btn active" data-gate="pauli-x">Pauli X</button>
+                <button class="gate-btn" data-gate="pauli-y">Pauli Y</button>
+                <button class="gate-btn" data-gate="pauli-z">Pauli Z</button>
+                <button class="gate-btn" data-gate="hadamard">Hadamard</button>
+                <button class="gate-btn" data-gate="phase">Phase (S)</button>
+                <button class="gate-btn" data-gate="t-gate">T Gate</button>
+            </div>
+            
+            <div class="state-input">
+                <div>
+                    <h3>Input State |ψ⟩</h3>
+                    <div class="control-group">
+                        <label>α Real: <span class="value-display" id="alpha-real-val">1.0</span></label>
+                        <input type="range" id="alpha-real" min="-1" max="1" step="0.1" value="1">
+                    </div>
+                    <div class="control-group">
+                        <label>α Imaginary: <span class="value-display" id="alpha-imag-val">0.0</span></label>
+                        <input type="range" id="alpha-imag" min="-1" max="1" step="0.1" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label>β Real: <span class="value-display" id="beta-real-val">0.0</span></label>
+                        <input type="range" id="beta-real" min="-1" max="1" step="0.1" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label>β Imaginary: <span class="value-display" id="beta-imag-val">0.0</span></label>
+                        <input type="range" id="beta-imag" min="-1" max="1" step="0.1" value="0">
+                    </div>
+                </div>
+                <div>
+                    <h3>Output State |ψ'⟩</h3>
+                    <div id="output-state" class="result-box">
+                        <div class="matrix-display" id="output-display">
+                            α' = 0.000 + 0.000i<br>
+                            β' = 1.000 + 0.000i
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-box" style="background: rgba(255, 165, 0, 0.1); border-color: rgba(255, 165, 0, 0.3);">
+                <h3>Gate Matrix</h3>
+                <div class="matrix-display" id="gate-matrix">
+                    [0  1]<br>
+                    [1  0]
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-grid">
+            <div class="panel">
+                <h2>Pauli Gates</h2>
+                <p>The <span class="highlight">Pauli gates</span> are fundamental single-qubit gates:</p>
+                
+                <h3>Pauli X (NOT Gate)</h3>
+                <div class="formula">
+                    X = [0  1]
+                        [1  0]
+                </div>
+                <p>Flips |0⟩ ↔ |1⟩ (bit flip)</p>
+                
+                <h3>Pauli Y</h3>
+                <div class="formula">
+                    Y = [0  -i]
+                        [i   0]
+                </div>
+                <p>Bit flip + phase flip (complex coefficients!)</p>
+                
+                <h3>Pauli Z</h3>
+                <div class="formula">
+                    Z = [1   0]
+                        [0  -1]
+                </div>
+                <p>Phase flip: |1⟩ → -|1⟩</p>
+                
+                <div class="example-box">
+                    <h3>Example: Pauli Y on |0⟩</h3>
+                    <p>Y|0⟩ = [0  -i] [1] = [0]  = i|1⟩</p>
+                    <p>      [i   0] [0]   [i]</p>
+                    <p>Introduces imaginary coefficient!</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Hadamard Gate</h2>
+                <p>The <span class="highlight">Hadamard gate</span> creates superposition:</p>
+                
+                <div class="formula">
+                    H = (1/√2) [1   1]
+                               [1  -1]
+                </div>
+                
+                <h3>Action on Basis States</h3>
+                <div class="example-box">
+                    <p>H|0⟩ = (1/√2)(|0⟩ + |1⟩) = |+⟩</p>
+                    <p>H|1⟩ = (1/√2)(|0⟩ − |1⟩) = |−⟩</p>
+                </div>
+                
+                <h3>Properties</h3>
+                <ul>
+                    <li>Self-inverse: H² = I</li>
+                    <li>Unitary: H†H = I</li>
+                    <li>Changes basis: computational ↔ Hadamard</li>
+                    <li>Real coefficients (no complex numbers)</li>
+                </ul>
+                
+                <div class="example-box">
+                    <h3>Quantum Interference</h3>
+                    <p>H|0⟩ = |+⟩</p>
+                    <p>H|+⟩ = H·H|0⟩ = |0⟩</p>
+                    <p>Applying H twice returns to original state!</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Phase Gates</h2>
+                <p><span class="highlight">Phase gates</span> add complex phases:</p>
+                
+                <h3>S Gate (Phase Gate)</h3>
+                <div class="formula">
+                    S = [1  0]
+                        [0  i]
+                </div>
+                <p>Adds π/2 phase to |1⟩</p>
+                
+                <h3>T Gate (π/8 Gate)</h3>
+                <div class="formula">
+                    T = [1      0    ]
+                        [0  e^(iπ/4)]
+                </div>
+                <p>Adds π/4 phase to |1⟩</p>
+                
+                <h3>General Phase Gate</h3>
+                <div class="formula">
+                    P(θ) = [1      0   ]
+                           [0  e^(iθ)]
+                </div>
+                
+                <div class="example-box">
+                    <h3>Example: S Gate on |+⟩</h3>
+                    <p>|+⟩ = (1/√2)(|0⟩ + |1⟩)</p>
+                    <p>S|+⟩ = (1/√2)(|0⟩ + i|1⟩) = |i⟩</p>
+                    <p>Creates complex superposition!</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Rotation Gates</h2>
+                <p><span class="highlight">Rotation gates</span> use Euler's formula:</p>
+                
+                <h3>X Rotation</h3>
+                <div class="formula">
+                    Rx(θ) = [cos(θ/2)   -i·sin(θ/2)]
+                            [-i·sin(θ/2)  cos(θ/2) ]
+                </div>
+                
+                <h3>Y Rotation</h3>
+                <div class="formula">
+                    Ry(θ) = [cos(θ/2)  -sin(θ/2)]
+                            [sin(θ/2)   cos(θ/2)]
+                </div>
+                
+                <h3>Z Rotation</h3>
+                <div class="formula">
+                    Rz(θ) = [e^(-iθ/2)      0     ]
+                            [    0      e^(iθ/2)]
+                </div>
+                
+                <div class="example-box">
+                    <h3>Complex Coefficients in Rx</h3>
+                    <p>Rx(π/2)|0⟩ = [cos(π/4)   -i·sin(π/4)] [1]</p>
+                    <p>             [-i·sin(π/4)  cos(π/4) ] [0]</p>
+                    <p>           = [1/√2]</p>
+                    <p>             [-i/√2]</p>
+                    <p>           = (1/√2)(|0⟩ − i|1⟩)</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Unitary Property</h2>
+            <p>All quantum gates are <span class="highlight">unitary</span>:</p>
+            
+            <div class="formula">
+                U†U = UU† = I
+            </div>
+            
+            <p>Where U† is the conjugate transpose (Hermitian adjoint).</p>
+            
+            <h3>Why Unitary?</h3>
+            <ul>
+                <li><strong>Reversibility:</strong> U† = U⁻¹ (gates are reversible)</li>
+                <li><strong>Norm preservation:</strong> ||U|ψ⟩|| = ||ψ|| (probability conserved)</li>
+                <li><strong>Inner product preservation:</strong> ⟨Uψ|Uφ⟩ = ⟨ψ|φ⟩</li>
+            </ul>
+            
+            <div class="example-box">
+                <h3>Example: Pauli Y is Unitary</h3>
+                <p>Y = [0  -i]    Y† = [0   i]</p>
+                <p>    [i   0]         [-i  0]</p>
+                <p></p>
+                <p>Y†Y = [0   i] [0  -i] = [1  0] = I ✓</p>
+                <p>      [-i  0] [i   0]   [0  1]</p>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Complex Coefficients in Quantum Gates</h2>
+            
+            <h3>Why Complex Numbers?</h3>
+            <p>Complex coefficients in quantum gates enable:</p>
+            <ul>
+                <li><strong>Phase control:</strong> Manipulate relative phases between basis states</li>
+                <li><strong>Interference:</strong> Create constructive/destructive interference</li>
+                <li><strong>Universal computation:</strong> Any unitary can be decomposed using gates with complex coefficients</li>
+                <li><strong>Quantum algorithms:</strong> Algorithms like Shor's rely on phase manipulation</li>
+            </ul>
+            
+            <div class="example-box">
+                <h3>Phase Kickback Example</h3>
+                <p>Consider controlled-S gate on |+⟩|1⟩:</p>
+                <p>|+⟩|1⟩ = (1/√2)(|0⟩ + |1⟩)|1⟩</p>
+                <p>CS|+⟩|1⟩ = (1/√2)(|0⟩|1⟩ + i|1⟩|1⟩)</p>
+                <p>         = (1/√2)(|0⟩ + i|1⟩)|1⟩</p>
+                <p>         = |i⟩|1⟩</p>
+                <p>Phase "kicks back" to control qubit!</p>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Gate Composition</h2>
+            <p>Gates can be <span class="highlight">composed</span> by matrix multiplication:</p>
+            
+            <div class="formula">
+                (U₂ ∘ U₁)|ψ⟩ = U₂(U₁|ψ⟩)
+            </div>
+            
+            <h3>Common Compositions</h3>
+            <div class="example-box">
+                <p><strong>HXH = Z</strong></p>
+                <p>Hadamard conjugates X into Z</p>
+                <br>
+                <p><strong>S² = Z</strong></p>
+                <p>Two S gates equal one Z gate</p>
+                <br>
+                <p><strong>T² = S</strong></p>
+                <p>Two T gates equal one S gate</p>
+                <br>
+                <p><strong>HSH = (1/√2)(X + Y)</strong></p>
+                <p>Creates superposition of Pauli gates</p>
+            </div>
+            
+            <h3>Universal Gate Sets</h3>
+            <p>Any unitary can be approximated using:</p>
+            <ul>
+                <li>{H, T, CNOT} (Clifford + T)</li>
+                <li>{Rx, Ry, Rz, CNOT}</li>
+                <li>{U3, CNOT} (IBM)</li>
+            </ul>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="../10-inner-products/index.html" class="btn">← Previous: Inner Products</a>
+            <a href="../index.html" class="btn">Home</a>
+            <a href="../12-bloch-sphere/index.html" class="btn">Next: Bloch Sphere →</a>
+        </div>
+    </div>
+    
+    <script>
+        let scene, camera, renderer;
+        let inputVector, outputVector;
+        let currentGate = 'pauli-x';
+        
+        const gates = {
+            'pauli-x': [[0, 1], [1, 0]],
+            'pauli-y': [[0, {r:0, i:-1}], [{r:0, i:1}, 0]],
+            'pauli-z': [[1, 0], [0, -1]],
+            'hadamard': [[1/Math.sqrt(2), 1/Math.sqrt(2)], [1/Math.sqrt(2), -1/Math.sqrt(2)]],
+            'phase': [[1, 0], [0, {r:0, i:1}]],
+            't-gate': [[1, 0], [0, {r:Math.cos(Math.PI/4), i:Math.sin(Math.PI/4)}]]
+        };
+        
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+            
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(3, 3, 5);
+            camera.lookAt(0, 0, 0);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            createScene();
+            
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const pointLight = new THREE.PointLight(0xffffff, 0.8, 100);
+            pointLight.position.set(10, 10, 10);
+            scene.add(pointLight);
+            
+            setupControls();
+            
+            window.addEventListener('resize', onWindowResize, false);
+            
+            animate();
+        }
+        
+        function createScene() {
+            const gridHelper = new THREE.GridHelper(10, 10, 0x444444, 0x222222);
+            scene.add(gridHelper);
+            
+            const axesHelper = new THREE.AxesHelper(3);
+            scene.add(axesHelper);
+            
+            inputVector = createVector(0x00aaff);
+            outputVector = createVector(0xff00aa);
+            
+            updateVectors();
+        }
+        
+        function createVector(color) {
+            const group = new THREE.Group();
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(1, 0, 0)
+            ]);
+            
+            const line = new THREE.Line(
+                geometry,
+                new THREE.LineBasicMaterial({ color: color, linewidth: 3 })
+            );
+            group.add(line);
+            
+            const coneGeometry = new THREE.ConeGeometry(0.15, 0.4, 16);
+            const coneMaterial = new THREE.MeshPhongMaterial({ color: color });
+            const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+            cone.position.set(1, 0, 0);
+            cone.rotation.z = -Math.PI / 2;
+            group.add(cone);
+            
+            scene.add(group);
+            return group;
+        }
+        
+        function setupControls() {
+            // Gate selector buttons
+            document.querySelectorAll('.gate-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.gate-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentGate = btn.dataset.gate;
+                    updateGateMatrix();
+                    applyGate();
+                });
+            });
+            
+            // State input sliders
+            const sliders = ['alpha-real', 'alpha-imag', 'beta-real', 'beta-imag'];
+            sliders.forEach(id => {
+                const slider = document.getElementById(id);
+                const display = document.getElementById(id + '-val');
+                
+                slider.addEventListener('input', () => {
+                    display.textContent = parseFloat(slider.value).toFixed(1);
+                    updateVectors();
+                    applyGate();
+                });
+            });
+            
+            updateGateMatrix();
+            applyGate();
+        }
+        
+        function updateGateMatrix() {
+            const gate = gates[currentGate];
+            let matrixStr = '';
+            
+            for (let i = 0; i < 2; i++) {
+                matrixStr += '[';
+                for (let j = 0; j < 2; j++) {
+                    const val = gate[i][j];
+                    if (typeof val === 'object') {
+                        matrixStr += `${val.r.toFixed(2)}${val.i >= 0 ? '+' : ''}${val.i.toFixed(2)}i`;
+                    } else {
+                        matrixStr += val.toFixed(2).padStart(5);
+                    }
+                    if (j < 1) matrixStr += '  ';
+                }
+                matrixStr += ']';
+                if (i < 1) matrixStr += '<br>';
+            }
+            
+            document.getElementById('gate-matrix').innerHTML = matrixStr;
+        }
+        
+        function complexMult(a, b) {
+            const ar = typeof a === 'object' ? a.r : a;
+            const ai = typeof a === 'object' ? a.i : 0;
+            const br = typeof b === 'object' ? b.r : b;
+            const bi = typeof b === 'object' ? b.i : 0;
+            
+            return {
+                r: ar * br - ai * bi,
+                i: ar * bi + ai * br
+            };
+        }
+        
+        function complexAdd(a, b) {
+            return {
+                r: a.r + b.r,
+                i: a.i + b.i
+            };
+        }
+        
+        function applyGate() {
+            const alphaR = parseFloat(document.getElementById('alpha-real').value);
+            const alphaI = parseFloat(document.getElementById('alpha-imag').value);
+            const betaR = parseFloat(document.getElementById('beta-real').value);
+            const betaI = parseFloat(document.getElementById('beta-imag').value);
+            
+            const alpha = {r: alphaR, i: alphaI};
+            const beta = {r: betaR, i: betaI};
+            
+            const gate = gates[currentGate];
+            
+            // Matrix multiplication
+            const term1 = complexMult(gate[0][0], alpha);
+            const term2 = complexMult(gate[0][1], beta);
+            const alphaPrime = complexAdd(term1, term2);
+            
+            const term3 = complexMult(gate[1][0], alpha);
+            const term4 = complexMult(gate[1][1], beta);
+            const betaPrime = complexAdd(term3, term4);
+            
+            const outputStr = `α' = ${alphaPrime.r.toFixed(3)} ${alphaPrime.i >= 0 ? '+' : ''}${alphaPrime.i.toFixed(3)}i<br>` +
+                            `β' = ${betaPrime.r.toFixed(3)} ${betaPrime.i >= 0 ? '+' : ''}${betaPrime.i.toFixed(3)}i`;
+            
+            document.getElementById('output-display').innerHTML = outputStr;
+            
+            // Update output vector visualization
+            updateOutputVector(alphaPrime, betaPrime);
+        }
+        
+        function updateVectors() {
+            const alphaR = parseFloat(document.getElementById('alpha-real').value);
+            const alphaI = parseFloat(document.getElementById('alpha-imag').value);
+            
+            const magnitude = Math.sqrt(alphaR*alphaR + alphaI*alphaI);
+            const angle = Math.atan2(alphaI, alphaR);
+            
+            inputVector.scale.set(magnitude > 0 ? magnitude : 0.1, magnitude > 0 ? magnitude : 0.1, magnitude > 0 ? magnitude : 0.1);
+            inputVector.rotation.y = angle;
+        }
+        
+        function updateOutputVector(alpha, beta) {
+            const magnitude = Math.sqrt(alpha.r*alpha.r + alpha.i*alpha.i + beta.r*beta.r + beta.i*beta.i);
+            const angle = Math.atan2(alpha.i, alpha.r);
+            
+            outputVector.scale.set(magnitude, magnitude, magnitude);
+            outputVector.rotation.y = angle;
+            outputVector.position.set(2, 0, 0);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const time = Date.now() * 0.001;
+            inputVector.position.y = Math.sin(time) * 0.3;
+            outputVector.position.y = Math.cos(time) * 0.3;
+            
+            renderer.render(scene, camera);
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
