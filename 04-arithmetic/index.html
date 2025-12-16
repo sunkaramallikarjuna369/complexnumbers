@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04 - Arithmetic Operations</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        #canvas-container {
+            height: 600px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        .operation-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .op-btn {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .op-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .op-btn.active {
+            background: rgba(255, 215, 0, 0.4);
+            border-color: #ffd700;
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .input-group {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .input-group h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+        
+        .value-display {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            margin-left: 10px;
+        }
+        
+        .result-panel {
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .result-panel h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        
+        .formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .example-box {
+            background: rgba(135, 206, 235, 0.1);
+            border-left: 4px solid #87ceeb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid, .input-grid, .operation-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>➕ Arithmetic Operations on Complex Numbers</h1>
+            <p>Addition, Multiplication, and Division</p>
+        </header>
+        
+        <div id="canvas-container"></div>
+        
+        <div class="controls">
+            <h2>Interactive Operations</h2>
+            <div class="operation-selector">
+                <button class="op-btn active" onclick="setOperation('add')">Addition</button>
+                <button class="op-btn" onclick="setOperation('multiply')">Multiplication</button>
+                <button class="op-btn" onclick="setOperation('divide')">Division</button>
+            </div>
+            
+            <div class="input-grid">
+                <div class="input-group">
+                    <h3>Complex Number z₁</h3>
+                    <div class="control-group">
+                        <label>Real Part: <span class="value-display" id="z1-real">3.0</span></label>
+                        <input type="range" id="z1-real-slider" min="-5" max="5" step="0.1" value="3">
+                    </div>
+                    <div class="control-group">
+                        <label>Imaginary Part: <span class="value-display" id="z1-imag">4.0</span></label>
+                        <input type="range" id="z1-imag-slider" min="-5" max="5" step="0.1" value="4">
+                    </div>
+                    <div class="formula" id="z1-display">z₁ = 3.0 + 4.0i</div>
+                </div>
+                
+                <div class="input-group">
+                    <h3>Complex Number z₂</h3>
+                    <div class="control-group">
+                        <label>Real Part: <span class="value-display" id="z2-real">1.0</span></label>
+                        <input type="range" id="z2-real-slider" min="-5" max="5" step="0.1" value="1">
+                    </div>
+                    <div class="control-group">
+                        <label>Imaginary Part: <span class="value-display" id="z2-imag">-2.0</span></label>
+                        <input type="range" id="z2-imag-slider" min="-5" max="5" step="0.1" value="-2">
+                    </div>
+                    <div class="formula" id="z2-display">z₂ = 1.0 - 2.0i</div>
+                </div>
+            </div>
+            
+            <div class="result-panel">
+                <h3 id="operation-title">Addition Result</h3>
+                <div class="formula" id="result-display">z₁ + z₂ = 4.0 + 2.0i</div>
+                <div id="result-details"></div>
+            </div>
+        </div>
+        
+        <div class="content-grid">
+            <div class="panel">
+                <h2>Addition</h2>
+                <p>Add complex numbers by adding their real and imaginary parts separately:</p>
+                
+                <div class="formula">
+                    z₁ + z₂ = (a₁ + a₂) + i(b₁ + b₂)
+                </div>
+                
+                <div class="example-box">
+                    <h3>Example</h3>
+                    <p><strong>(3 + 4i) + (1 − 2i)</strong></p>
+                    <p>Real parts: 3 + 1 = 4</p>
+                    <p>Imaginary parts: 4 + (−2) = 2</p>
+                    <p><strong>Result: 4 + 2i</strong></p>
+                </div>
+                
+                <h3>Geometric Interpretation</h3>
+                <p>Addition corresponds to vector addition in the complex plane. The result is the diagonal of the parallelogram formed by the two vectors.</p>
+            </div>
+            
+            <div class="panel">
+                <h2>Multiplication</h2>
+                <p>Multiply complex numbers using the distributive property and i² = −1:</p>
+                
+                <div class="formula">
+                    z₁z₂ = (a₁a₂ − b₁b₂) + i(a₁b₂ + a₂b₁)
+                </div>
+                
+                <div class="example-box">
+                    <h3>Example</h3>
+                    <p><strong>(3 + 4i)(1 − 2i)</strong></p>
+                    <p>= 3(1) + 3(−2i) + 4i(1) + 4i(−2i)</p>
+                    <p>= 3 − 6i + 4i − 8i²</p>
+                    <p>= 3 − 2i − 8(−1)</p>
+                    <p>= 3 − 2i + 8</p>
+                    <p><strong>Result: 11 − 2i</strong></p>
+                </div>
+                
+                <h3>Polar Form</h3>
+                <p>In polar form, multiplication is simpler:</p>
+                <div class="formula">
+                    r₁e^(iθ₁) × r₂e^(iθ₂) = r₁r₂e^(i(θ₁+θ₂))
+                </div>
+                <p>Multiply magnitudes, add arguments!</p>
+            </div>
+            
+            <div class="panel">
+                <h2>Division</h2>
+                <p>Divide by multiplying numerator and denominator by the conjugate of the denominator:</p>
+                
+                <div class="formula">
+                    z₁/z₂ = (a₁ + ib₁)/(a₂ + ib₂) × (a₂ − ib₂)/(a₂ − ib₂)
+                </div>
+                
+                <div class="example-box">
+                    <h3>Example</h3>
+                    <p><strong>(3 + 4i) / (1 − 2i)</strong></p>
+                    <p>Multiply by conjugate (1 + 2i)/(1 + 2i):</p>
+                    <p>= (3 + 4i)(1 + 2i) / (1 − 2i)(1 + 2i)</p>
+                    <p>= (3 + 6i + 4i + 8i²) / (1 − 4i²)</p>
+                    <p>= (3 + 10i − 8) / (1 + 4)</p>
+                    <p>= (−5 + 10i) / 5</p>
+                    <p><strong>Result: −1 + 2i</strong></p>
+                </div>
+                
+                <h3>Polar Form</h3>
+                <div class="formula">
+                    r₁e^(iθ₁) / r₂e^(iθ₂) = (r₁/r₂)e^(i(θ₁−θ₂))
+                </div>
+                <p>Divide magnitudes, subtract arguments!</p>
+            </div>
+            
+            <div class="panel">
+                <h2>Quantum Computing Applications</h2>
+                
+                <h3>State Superposition (Addition)</h3>
+                <p>Quantum superposition involves adding complex amplitudes:</p>
+                <div class="formula">
+                    |ψ⟩ = α|0⟩ + β|1⟩
+                </div>
+                <p>The amplitudes α and β are complex numbers that add to create the superposition state.</p>
+                
+                <h3>Gate Operations (Multiplication)</h3>
+                <p>Quantum gates multiply state amplitudes by complex numbers:</p>
+                <div class="formula">
+                    Phase gate: |ψ⟩ → e^(iφ)|ψ⟩
+                </div>
+                <p>This multiplies the amplitude by a complex exponential, changing the phase.</p>
+                
+                <h3>Measurement Probabilities</h3>
+                <p>After operations, probabilities are calculated from complex amplitudes:</p>
+                <div class="formula">
+                    P = |α|² = α × α*
+                </div>
+                <p>This involves multiplication with the complex conjugate.</p>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Properties of Complex Arithmetic</h2>
+            
+            <h3>Commutative Property</h3>
+            <ul>
+                <li><strong>Addition:</strong> z₁ + z₂ = z₂ + z₁</li>
+                <li><strong>Multiplication:</strong> z₁z₂ = z₂z₁</li>
+            </ul>
+            
+            <h3>Associative Property</h3>
+            <ul>
+                <li><strong>Addition:</strong> (z₁ + z₂) + z₃ = z₁ + (z₂ + z₃)</li>
+                <li><strong>Multiplication:</strong> (z₁z₂)z₃ = z₁(z₂z₃)</li>
+            </ul>
+            
+            <h3>Distributive Property</h3>
+            <ul>
+                <li>z₁(z₂ + z₃) = z₁z₂ + z₁z₃</li>
+            </ul>
+            
+            <h3>Identity Elements</h3>
+            <ul>
+                <li><strong>Additive identity:</strong> z + 0 = z</li>
+                <li><strong>Multiplicative identity:</strong> z × 1 = z</li>
+            </ul>
+            
+            <h3>Inverse Elements</h3>
+            <ul>
+                <li><strong>Additive inverse:</strong> z + (−z) = 0</li>
+                <li><strong>Multiplicative inverse:</strong> z × (1/z) = 1 (for z ≠ 0)</li>
+            </ul>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="../03-complex-plane/index.html" class="btn">← Previous: Complex Plane</a>
+            <a href="../index.html" class="btn">Home</a>
+            <a href="../05-conjugate-magnitude/index.html" class="btn">Next: Conjugate & Magnitude →</a>
+        </div>
+    </div>
+    
+    <script>
+        let scene, camera, renderer;
+        let z1Vector, z2Vector, resultVector;
+        let z1 = {real: 3, imag: 4};
+        let z2 = {real: 1, imag: -2};
+        let currentOperation = 'add';
+        
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+            
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(10, 8, 10);
+            camera.lookAt(0, 0, 0);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            createAxes();
+            createVectors();
+            
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const pointLight = new THREE.PointLight(0xffffff, 0.8, 100);
+            pointLight.position.set(10, 10, 10);
+            scene.add(pointLight);
+            
+            setupControls();
+            window.addEventListener('resize', onWindowResize, false);
+            
+            animate();
+        }
+        
+        function createAxes() {
+            const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+            scene.add(gridHelper);
+            
+            const axesHelper = new THREE.AxesHelper(10);
+            scene.add(axesHelper);
+        }
+        
+        function createVectors() {
+            // z1 vector (blue)
+            z1Vector = new THREE.ArrowHelper(
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(0, 0, 0),
+                1, 0x0088ff, 0.5, 0.3
+            );
+            scene.add(z1Vector);
+            
+            // z2 vector (red)
+            z2Vector = new THREE.ArrowHelper(
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(0, 0, 0),
+                1, 0xff0088, 0.5, 0.3
+            );
+            scene.add(z2Vector);
+            
+            // Result vector (yellow)
+            resultVector = new THREE.ArrowHelper(
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(0, 0, 0),
+                1, 0xffff00, 0.5, 0.3
+            );
+            scene.add(resultVector);
+            
+            updateVectors();
+        }
+        
+        function updateVectors() {
+            // Update z1
+            const len1 = Math.sqrt(z1.real * z1.real + z1.imag * z1.imag);
+            const dir1 = new THREE.Vector3(z1.real, 0, z1.imag).normalize();
+            z1Vector.setDirection(dir1);
+            z1Vector.setLength(len1, len1 * 0.2, len1 * 0.15);
+            
+            // Update z2
+            const len2 = Math.sqrt(z2.real * z2.real + z2.imag * z2.imag);
+            const dir2 = new THREE.Vector3(z2.real, 0, z2.imag).normalize();
+            z2Vector.setDirection(dir2);
+            z2Vector.setLength(len2, len2 * 0.2, len2 * 0.15);
+            
+            // Calculate and update result
+            let result = calculateResult();
+            const lenR = Math.sqrt(result.real * result.real + result.imag * result.imag);
+            const dirR = new THREE.Vector3(result.real, 0, result.imag).normalize();
+            resultVector.setDirection(dirR);
+            resultVector.setLength(lenR, lenR * 0.2, lenR * 0.15);
+            
+            // Update position for addition visualization
+            if (currentOperation === 'add') {
+                z2Vector.position.set(z1.real, 0, z1.imag);
+            } else {
+                z2Vector.position.set(0, 0, 0);
+            }
+            
+            updateDisplay();
+        }
+        
+        function calculateResult() {
+            if (currentOperation === 'add') {
+                return {
+                    real: z1.real + z2.real,
+                    imag: z1.imag + z2.imag
+                };
+            } else if (currentOperation === 'multiply') {
+                return {
+                    real: z1.real * z2.real - z1.imag * z2.imag,
+                    imag: z1.real * z2.imag + z1.imag * z2.real
+                };
+            } else { // divide
+                const denom = z2.real * z2.real + z2.imag * z2.imag;
+                return {
+                    real: (z1.real * z2.real + z1.imag * z2.imag) / denom,
+                    imag: (z1.imag * z2.real - z1.real * z2.imag) / denom
+                };
+            }
+        }
+        
+        function updateDisplay() {
+            document.getElementById('z1-real').textContent = z1.real.toFixed(1);
+            document.getElementById('z1-imag').textContent = z1.imag.toFixed(1);
+            document.getElementById('z2-real').textContent = z2.real.toFixed(1);
+            document.getElementById('z2-imag').textContent = z2.imag.toFixed(1);
+            
+            const sign1 = z1.imag >= 0 ? '+' : '';
+            const sign2 = z2.imag >= 0 ? '+' : '';
+            
+            document.getElementById('z1-display').textContent = 
+                `z₁ = ${z1.real.toFixed(1)} ${sign1} ${z1.imag.toFixed(1)}i`;
+            document.getElementById('z2-display').textContent = 
+                `z₂ = ${z2.real.toFixed(1)} ${sign2} ${z2.imag.toFixed(1)}i`;
+            
+            const result = calculateResult();
+            const signR = result.imag >= 0 ? '+' : '';
+            
+            let opSymbol = '+';
+            let opName = 'Addition';
+            if (currentOperation === 'multiply') {
+                opSymbol = '×';
+                opName = 'Multiplication';
+            } else if (currentOperation === 'divide') {
+                opSymbol = '/';
+                opName = 'Division';
+            }
+            
+            document.getElementById('operation-title').textContent = `${opName} Result`;
+            document.getElementById('result-display').textContent = 
+                `z₁ ${opSymbol} z₂ = ${result.real.toFixed(2)} ${signR} ${result.imag.toFixed(2)}i`;
+        }
+        
+        function setOperation(op) {
+            currentOperation = op;
+            document.querySelectorAll('.op-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateVectors();
+        }
+        
+        function setupControls() {
+            document.getElementById('z1-real-slider').addEventListener('input', (e) => {
+                z1.real = parseFloat(e.target.value);
+                updateVectors();
+            });
+            
+            document.getElementById('z1-imag-slider').addEventListener('input', (e) => {
+                z1.imag = parseFloat(e.target.value);
+                updateVectors();
+            });
+            
+            document.getElementById('z2-real-slider').addEventListener('input', (e) => {
+                z2.real = parseFloat(e.target.value);
+                updateVectors();
+            });
+            
+            document.getElementById('z2-imag-slider').addEventListener('input', (e) => {
+                z2.imag = parseFloat(e.target.value);
+                updateVectors();
+            });
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const time = Date.now() * 0.0001;
+            camera.position.x = 10 * Math.cos(time);
+            camera.position.z = 10 * Math.sin(time);
+            camera.lookAt(0, 0, 0);
+            
+            renderer.render(scene, camera);
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
