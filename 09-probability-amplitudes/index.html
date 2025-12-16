@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>09 - Probability Amplitudes and Measurement</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        #canvas-container {
+            height: 600px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+        
+        .value-display {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            margin-left: 10px;
+        }
+        
+        .formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .info-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .info-card h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .example-box {
+            background: rgba(135, 206, 235, 0.1);
+            border-left: 4px solid #87ceeb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .simulate-btn {
+            padding: 15px 40px;
+            background: rgba(255, 215, 0, 0.3);
+            border: 2px solid #ffd700;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px auto;
+            display: block;
+        }
+        
+        .simulate-btn:hover {
+            background: rgba(255, 215, 0, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid, .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Probability Amplitudes and Measurement</h1>
+            <p>The Born Rule and Quantum Measurement</p>
+        </header>
+        
+        <div id="canvas-container"></div>
+        
+        <div class="controls">
+            <h2>Probability Amplitude Simulator</h2>
+            
+            <div class="control-group">
+                <label>Amplitude α (real): <span class="value-display" id="alpha-real">0.60</span></label>
+                <input type="range" id="alpha-real-slider" min="-1" max="1" step="0.01" value="0.6">
+            </div>
+            
+            <div class="control-group">
+                <label>Amplitude α (imaginary): <span class="value-display" id="alpha-imag">0.00</span></label>
+                <input type="range" id="alpha-imag-slider" min="-1" max="1" step="0.01" value="0">
+            </div>
+            
+            <div class="control-group">
+                <label>Amplitude β (real): <span class="value-display" id="beta-real">0.80</span></label>
+                <input type="range" id="beta-real-slider" min="-1" max="1" step="0.01" value="0.8">
+            </div>
+            
+            <div class="control-group">
+                <label>Amplitude β (imaginary): <span class="value-display" id="beta-imag">0.00</span></label>
+                <input type="range" id="beta-imag-slider" min="-1" max="1" step="0.01" value="0">
+            </div>
+            
+            <button class="simulate-btn" onclick="simulateMeasurements()">🎲 Simulate 1000 Measurements</button>
+            
+            <div class="formula" id="state-display">|ψ⟩ = 0.60|0⟩ + 0.80|1⟩</div>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Theoretical Probabilities</h3>
+                    <div class="formula" id="theory-display">
+                        P(0) = 0.36<br>
+                        P(1) = 0.64
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h3>Experimental Results</h3>
+                    <div class="formula" id="experiment-display">
+                        Click simulate button
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-grid">
+            <div class="panel">
+                <h2>The Born Rule</h2>
+                <p>The <span class="highlight">Born rule</span> connects complex amplitudes to probabilities:</p>
+                
+                <div class="formula">
+                    P(outcome) = |amplitude|²
+                </div>
+                
+                <p>For a quantum state |ψ⟩ = α|0⟩ + β|1⟩:</p>
+                <ul>
+                    <li><strong>P(0) = |α|²</strong> - probability of measuring 0</li>
+                    <li><strong>P(1) = |β|²</strong> - probability of measuring 1</li>
+                </ul>
+                
+                <h3>Why Square the Magnitude?</h3>
+                <p>Amplitudes can be negative or complex, but probabilities must be:</p>
+                <ul>
+                    <li><strong>Real</strong> - not imaginary</li>
+                    <li><strong>Non-negative</strong> - between 0 and 1</li>
+                    <li><strong>Normalized</strong> - sum to 1</li>
+                </ul>
+                
+                <div class="example-box">
+                    <h3>Example: Complex Amplitude</h3>
+                    <p>α = 3/5 + 0i</p>
+                    <p>β = 0 + 4i/5</p>
+                    <p>|α|² = (3/5)² = 9/25 = 0.36</p>
+                    <p>|β|² = (4/5)² = 16/25 = 0.64</p>
+                    <p>Total: 0.36 + 0.64 = 1.00 ✓</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Measurement Process</h2>
+                
+                <h3>Before Measurement</h3>
+                <p>The quantum state exists in <span class="highlight">superposition</span>:</p>
+                <div class="formula">
+                    |ψ⟩ = α|0⟩ + β|1⟩
+                </div>
+                <p>The system is in both states simultaneously!</p>
+                
+                <h3>During Measurement</h3>
+                <p>The measurement apparatus interacts with the quantum system.</p>
+                <p>The superposition <span class="highlight">collapses</span> to one outcome.</p>
+                
+                <h3>After Measurement</h3>
+                <p>The state becomes definite:</p>
+                <ul>
+                    <li>If outcome is 0: |ψ⟩ → |0⟩</li>
+                    <li>If outcome is 1: |ψ⟩ → |1⟩</li>
+                </ul>
+                
+                <div class="example-box">
+                    <h3>Measurement Statistics</h3>
+                    <p>State: |ψ⟩ = (|0⟩ + |1⟩)/√2</p>
+                    <p>P(0) = P(1) = 0.5</p>
+                    <p>If measured 1000 times:</p>
+                    <p>~500 times: outcome 0</p>
+                    <p>~500 times: outcome 1</p>
+                    <p>Each measurement: state collapses!</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Probability vs Amplitude</h2>
+                
+                <h3>Classical Probability</h3>
+                <p>In classical physics:</p>
+                <ul>
+                    <li>Probabilities are always real and positive</li>
+                    <li>P(A or B) = P(A) + P(B)</li>
+                    <li>No interference effects</li>
+                </ul>
+                
+                <h3>Quantum Amplitude</h3>
+                <p>In quantum mechanics:</p>
+                <ul>
+                    <li>Amplitudes can be complex</li>
+                    <li>Amplitudes add: A_total = A₁ + A₂</li>
+                    <li>Then square: P = |A_total|²</li>
+                    <li>Interference effects possible!</li>
+                </ul>
+                
+                <div class="example-box">
+                    <h3>Interference Example</h3>
+                    <p><strong>Classical:</strong></p>
+                    <p>P_total = P₁ + P₂ = 0.5 + 0.5 = 1.0</p>
+                    
+                    <p><strong>Quantum (constructive):</strong></p>
+                    <p>A₁ = 1/√2, A₂ = 1/√2</p>
+                    <p>A_total = 1/√2 + 1/√2 = √2</p>
+                    <p>P = |√2|² = 2 (enhanced!)</p>
+                    
+                    <p><strong>Quantum (destructive):</strong></p>
+                    <p>A₁ = 1/√2, A₂ = −1/√2</p>
+                    <p>A_total = 1/√2 − 1/√2 = 0</p>
+                    <p>P = |0|² = 0 (cancelled!)</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Multi-Qubit Systems</h2>
+                
+                <h3>Two-Qubit State</h3>
+                <div class="formula">
+                    |ψ⟩ = α₀₀|00⟩ + α₀₁|01⟩ + α₁₀|10⟩ + α₁₁|11⟩
+                </div>
+                
+                <p>Probabilities:</p>
+                <ul>
+                    <li>P(00) = |α₀₀|²</li>
+                    <li>P(01) = |α₀₁|²</li>
+                    <li>P(10) = |α₁₀|²</li>
+                    <li>P(11) = |α₁₁|²</li>
+                </ul>
+                
+                <p>Normalization: |α₀₀|² + |α₀₁|² + |α₁₀|² + |α₁₁|² = 1</p>
+                
+                <div class="example-box">
+                    <h3>Bell State</h3>
+                    <p>|Φ+⟩ = (|00⟩ + |11⟩)/√2</p>
+                    <p>α₀₀ = 1/√2, α₁₁ = 1/√2</p>
+                    <p>α₀₁ = 0, α₁₀ = 0</p>
+                    <p>P(00) = 0.5, P(11) = 0.5</p>
+                    <p>P(01) = 0, P(10) = 0</p>
+                    <p>Perfect correlation!</p>
+                </div>
+                
+                <h3>Partial Measurement</h3>
+                <p>Measuring only one qubit:</p>
+                <ul>
+                    <li>P(first qubit = 0) = |α₀₀|² + |α₀₁|²</li>
+                    <li>P(first qubit = 1) = |α₁₀|² + |α₁₁|²</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Applications in Quantum Computing</h2>
+            
+            <h3>1. Quantum Algorithms</h3>
+            <p>Algorithms manipulate amplitudes to:</p>
+            <ul>
+                <li>Amplify correct answer amplitudes</li>
+                <li>Cancel wrong answer amplitudes</li>
+                <li>Achieve quantum speedup</li>
+            </ul>
+            
+            <div class="example-box">
+                <h3>Grover's Algorithm</h3>
+                <p>Searches N items in √N steps</p>
+                <p>Uses amplitude amplification:</p>
+                <p>1. Start with equal superposition</p>
+                <p>2. Mark target state (phase flip)</p>
+                <p>3. Amplify marked amplitude</p>
+                <p>4. Repeat ~√N times</p>
+                <p>5. Measure with high probability!</p>
+            </div>
+            
+            <h3>2. Quantum Error Correction</h3>
+            <p>Protects quantum information by:</p>
+            <ul>
+                <li>Encoding logical qubits in multiple physical qubits</li>
+                <li>Detecting errors without measuring state</li>
+                <li>Correcting errors while preserving superposition</li>
+            </ul>
+            
+            <h3>3. Quantum Simulation</h3>
+            <p>Simulates quantum systems naturally:</p>
+            <ul>
+                <li>Molecular dynamics</li>
+                <li>Material properties</li>
+                <li>Chemical reactions</li>
+            </ul>
+            
+            <h3>4. Quantum Machine Learning</h3>
+            <p>Uses quantum amplitudes for:</p>
+            <ul>
+                <li>Feature encoding</li>
+                <li>Quantum neural networks</li>
+                <li>Amplitude-based classification</li>
+            </ul>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="../08-python-operations/index.html" class="btn">← Previous: Python Operations</a>
+            <a href="../index.html" class="btn">Home</a>
+            <a href="../10-inner-products/index.html" class="btn">Next: Inner Products →</a>
+        </div>
+    </div>
+    
+    <script>
+        let scene, camera, renderer;
+        let bars = [];
+        let alpha = {real: 0.6, imag: 0};
+        let beta = {real: 0.8, imag: 0};
+        
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+            
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 5, 8);
+            camera.lookAt(0, 0, 0);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            createScene();
+            
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const pointLight = new THREE.PointLight(0xffffff, 0.8, 100);
+            pointLight.position.set(10, 10, 10);
+            scene.add(pointLight);
+            
+            setupControls();
+            window.addEventListener('resize', onWindowResize, false);
+            
+            animate();
+        }
+        
+        function createScene() {
+            const gridHelper = new THREE.GridHelper(10, 10, 0x444444, 0x222222);
+            scene.add(gridHelper);
+            
+            // Create probability bars
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            
+            const material0 = new THREE.MeshPhongMaterial({
+                color: 0x00aaff,
+                emissive: 0x003366
+            });
+            const bar0 = new THREE.Mesh(geometry, material0);
+            bar0.position.set(-2, 0, 0);
+            scene.add(bar0);
+            bars.push(bar0);
+            
+            const material1 = new THREE.MeshPhongMaterial({
+                color: 0xff00aa,
+                emissive: 0x660033
+            });
+            const bar1 = new THREE.Mesh(geometry, material1);
+            bar1.position.set(2, 0, 0);
+            scene.add(bar1);
+            bars.push(bar1);
+            
+            updateVisualization();
+        }
+        
+        function updateVisualization() {
+            const alphaMag = Math.sqrt(alpha.real * alpha.real + alpha.imag * alpha.imag);
+            const betaMag = Math.sqrt(beta.real * beta.real + beta.imag * beta.imag);
+            
+            const prob0 = alphaMag * alphaMag;
+            const prob1 = betaMag * betaMag;
+            
+            // Scale bars by probability
+            bars[0].scale.y = prob0 * 5;
+            bars[0].position.y = prob0 * 2.5;
+            
+            bars[1].scale.y = prob1 * 5;
+            bars[1].position.y = prob1 * 2.5;
+            
+            updateDisplays();
+        }
+        
+        function updateDisplays() {
+            const alphaMag = Math.sqrt(alpha.real * alpha.real + alpha.imag * alpha.imag);
+            const betaMag = Math.sqrt(beta.real * beta.real + beta.imag * beta.imag);
+            
+            document.getElementById('alpha-real').textContent = alpha.real.toFixed(2);
+            document.getElementById('alpha-imag').textContent = alpha.imag.toFixed(2);
+            document.getElementById('beta-real').textContent = beta.real.toFixed(2);
+            document.getElementById('beta-imag').textContent = beta.imag.toFixed(2);
+            
+            const alphaStr = formatComplex(alpha);
+            const betaStr = formatComplex(beta);
+            
+            document.getElementById('state-display').textContent = `|ψ⟩ = ${alphaStr}|0⟩ + ${betaStr}|1⟩`;
+            
+            const prob0 = alphaMag * alphaMag;
+            const prob1 = betaMag * betaMag;
+            
+            document.getElementById('theory-display').innerHTML = 
+                `P(0) = ${prob0.toFixed(2)}<br>P(1) = ${prob1.toFixed(2)}`;
+        }
+        
+        function formatComplex(c) {
+            if (Math.abs(c.imag) < 0.01) {
+                return c.real.toFixed(2);
+            } else if (Math.abs(c.real) < 0.01) {
+                return `${c.imag.toFixed(2)}i`;
+            } else {
+                const sign = c.imag >= 0 ? '+' : '';
+                return `(${c.real.toFixed(2)} ${sign} ${c.imag.toFixed(2)}i)`;
+            }
+        }
+        
+        function simulateMeasurements() {
+            const alphaMag = Math.sqrt(alpha.real * alpha.real + alpha.imag * alpha.imag);
+            const betaMag = Math.sqrt(beta.real * beta.real + beta.imag * beta.imag);
+            
+            const prob0 = alphaMag * alphaMag;
+            const prob1 = betaMag * betaMag;
+            
+            let count0 = 0;
+            let count1 = 0;
+            const n = 1000;
+            
+            for (let i = 0; i < n; i++) {
+                if (Math.random() < prob0) {
+                    count0++;
+                } else {
+                    count1++;
+                }
+            }
+            
+            document.getElementById('experiment-display').innerHTML = 
+                `Outcome 0: ${count0} (${(count0/n*100).toFixed(1)}%)<br>` +
+                `Outcome 1: ${count1} (${(count1/n*100).toFixed(1)}%)`;
+        }
+        
+        function setupControls() {
+            document.getElementById('alpha-real-slider').addEventListener('input', (e) => {
+                alpha.real = parseFloat(e.target.value);
+                updateVisualization();
+            });
+            
+            document.getElementById('alpha-imag-slider').addEventListener('input', (e) => {
+                alpha.imag = parseFloat(e.target.value);
+                updateVisualization();
+            });
+            
+            document.getElementById('beta-real-slider').addEventListener('input', (e) => {
+                beta.real = parseFloat(e.target.value);
+                updateVisualization();
+            });
+            
+            document.getElementById('beta-imag-slider').addEventListener('input', (e) => {
+                beta.imag = parseFloat(e.target.value);
+                updateVisualization();
+            });
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
