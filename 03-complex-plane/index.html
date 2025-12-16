@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03 - Complex Plane Representation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        #canvas-container {
+            height: 700px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #ffd700;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+        
+        .value-display {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            margin-left: 10px;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 20px;
+            grid-column: 1 / -1;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .info-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            color: #ffd700;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        h3 {
+            color: #87ceeb;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+        
+        .formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .example-box {
+            background: rgba(135, 206, 235, 0.1);
+            border-left: 4px solid #87ceeb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid, .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗺️ Complex Plane Representation</h1>
+            <p>Cartesian and Polar Forms</p>
+        </header>
+        
+        <div id="canvas-container"></div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Real Part (a): <span class="value-display" id="real-value">1.0</span></label>
+                <input type="range" id="real-slider" min="-5" max="5" step="0.1" value="1">
+            </div>
+            <div class="control-group">
+                <label>Imaginary Part (b): <span class="value-display" id="imag-value">1.0</span></label>
+                <input type="range" id="imag-slider" min="-5" max="5" step="0.1" value="1">
+            </div>
+            
+            <div class="info-panel">
+                <h3>Complex Number Information</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Cartesian Form</div>
+                        <div class="info-value" id="cartesian-form">1.0 + 1.0i</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Magnitude (r)</div>
+                        <div class="info-value" id="magnitude">1.41</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Argument (θ)</div>
+                        <div class="info-value" id="argument">45.0°</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Polar Form</div>
+                        <div class="info-value" id="polar-form">1.41∠45°</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Exponential Form</div>
+                        <div class="info-value" id="exponential-form">1.41e^(i0.79)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-grid">
+            <div class="panel">
+                <h2>Cartesian Form</h2>
+                <p>
+                    The <span class="highlight">Cartesian form</span> represents a complex number using 
+                    rectangular coordinates:
+                </p>
+                
+                <div class="formula">
+                    z = a + bi
+                </div>
+                
+                <p>where:</p>
+                <ul>
+                    <li><strong>a</strong> = real part (x-coordinate)</li>
+                    <li><strong>b</strong> = imaginary part (y-coordinate)</li>
+                </ul>
+                
+                <h3>Geometric Interpretation</h3>
+                <p>
+                    In the complex plane:
+                </p>
+                <ul>
+                    <li><strong>Horizontal axis (x):</strong> Real part</li>
+                    <li><strong>Vertical axis (y):</strong> Imaginary part</li>
+                    <li><strong>Point (a, b):</strong> Represents z = a + bi</li>
+                </ul>
+                
+                <div class="example-box">
+                    <h3>Example</h3>
+                    <p><strong>z = 1 + i</strong></p>
+                    <p>Point: (1, 1) in the complex plane</p>
+                    <p>This is in the first quadrant at 45° from the real axis</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Polar Form</h2>
+                <p>
+                    The <span class="highlight">polar form</span> represents a complex number using 
+                    magnitude and angle:
+                </p>
+                
+                <div class="formula">
+                    z = r(cos θ + i sin θ)
+                </div>
+                
+                <p>where:</p>
+                <ul>
+                    <li><strong>r</strong> = magnitude = |z| = √(a² + b²)</li>
+                    <li><strong>θ</strong> = argument = arg(z) = tan⁻¹(b/a)</li>
+                </ul>
+                
+                <h3>Conversion Formulas</h3>
+                <div class="formula">
+                    Cartesian → Polar:<br>
+                    r = √(a² + b²)<br>
+                    θ = tan⁻¹(b/a)<br><br>
+                    Polar → Cartesian:<br>
+                    a = r cos θ<br>
+                    b = r sin θ
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Exponential Form (Euler's Formula)</h2>
+                <p>
+                    Using Euler's formula, we can write the polar form more compactly:
+                </p>
+                
+                <div class="formula">
+                    z = re^(iθ)
+                </div>
+                
+                <p>
+                    This is equivalent to the polar form because:
+                </p>
+                
+                <div class="formula">
+                    e^(iθ) = cos θ + i sin θ
+                </div>
+                
+                <h3>Why Exponential Form?</h3>
+                <ul>
+                    <li><strong>Compact notation:</strong> Easier to write and manipulate</li>
+                    <li><strong>Multiplication:</strong> z₁z₂ = r₁r₂e^(i(θ₁+θ₂))</li>
+                    <li><strong>Powers:</strong> z^n = r^n e^(inθ)</li>
+                    <li><strong>Quantum gates:</strong> Natural representation for rotations</li>
+                </ul>
+                
+                <div class="example-box">
+                    <h3>Example: z = 1 + i</h3>
+                    <p><strong>Magnitude:</strong> r = √(1² + 1²) = √2 ≈ 1.414</p>
+                    <p><strong>Argument:</strong> θ = tan⁻¹(1/1) = π/4 = 45°</p>
+                    <p><strong>Polar:</strong> z = √2(cos 45° + i sin 45°)</p>
+                    <p><strong>Exponential:</strong> z = √2 e^(iπ/4)</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Quantum Computing Connection</h2>
+                <p>
+                    In quantum computing, the exponential form is particularly important:
+                </p>
+                
+                <h3>Quantum State Representation</h3>
+                <div class="formula">
+                    |ψ⟩ = cos(θ/2)|0⟩ + e^(iφ) sin(θ/2)|1⟩
+                </div>
+                
+                <p>
+                    The phase factor e^(iφ) is a complex number in exponential form that encodes 
+                    the relative phase between basis states.
+                </p>
+                
+                <h3>Rotation Operations</h3>
+                <p>
+                    Quantum gates often perform rotations, which are naturally expressed using 
+                    complex exponentials:
+                </p>
+                
+                <div class="formula">
+                    R_z(θ) = [e^(-iθ/2)    0      ]<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[   0      e^(iθ/2)]
+                </div>
+                
+                <p>
+                    This gate rotates the qubit state by angle θ around the z-axis of the Bloch sphere.
+                </p>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>The Argand Diagram</h2>
+            <p>
+                The complex plane is also called the <span class="highlight">Argand diagram</span>, 
+                named after Jean-Robert Argand who popularized this geometric representation.
+            </p>
+            
+            <h3>Key Features</h3>
+            <ul>
+                <li><strong>Real axis:</strong> Horizontal line (all points with b = 0)</li>
+                <li><strong>Imaginary axis:</strong> Vertical line (all points with a = 0)</li>
+                <li><strong>Origin:</strong> The point z = 0 + 0i</li>
+                <li><strong>Unit circle:</strong> All points with |z| = 1</li>
+            </ul>
+            
+            <div class="example-box">
+                <h3>Interactive Visualization Above</h3>
+                <p>
+                    Use the sliders to explore different complex numbers. Notice how:
+                </p>
+                <ul>
+                    <li>The <strong>blue arrow</strong> shows the complex number as a vector</li>
+                    <li>The <strong>red line</strong> shows the real component</li>
+                    <li>The <strong>green line</strong> shows the imaginary component</li>
+                    <li>The <strong>yellow arc</strong> shows the argument (angle)</li>
+                    <li>The <strong>magnitude</strong> is the length of the blue arrow</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="../02-definition/index.html" class="btn">← Previous: Definition</a>
+            <a href="../index.html" class="btn">Home</a>
+            <a href="../04-arithmetic/index.html" class="btn">Next: Arithmetic →</a>
+        </div>
+    </div>
+    
+    <script>
+        let scene, camera, renderer;
+        let complexVector, realComponent, imagComponent, angleArc;
+        let realValue = 1.0, imagValue = 1.0;
+        
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a1a);
+            
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(10, 8, 10);
+            camera.lookAt(0, 0, 0);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            createComplexPlane();
+            createComplexNumber();
+            
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const pointLight = new THREE.PointLight(0xffffff, 0.8, 100);
+            pointLight.position.set(10, 10, 10);
+            scene.add(pointLight);
+            
+            setupControls();
+            window.addEventListener('resize', onWindowResize, false);
+            
+            animate();
+        }
+        
+        function createComplexPlane() {
+            // Grid
+            const gridHelper = new THREE.GridHelper(12, 24, 0x444444, 0x222222);
+            scene.add(gridHelper);
+            
+            // Real axis (red)
+            const realAxisGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(-6, 0, 0),
+                new THREE.Vector3(6, 0, 0)
+            ]);
+            const realAxisMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
+            const realAxis = new THREE.Line(realAxisGeometry, realAxisMaterial);
+            scene.add(realAxis);
+            
+            // Imaginary axis (green)
+            const imagAxisGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, -6),
+                new THREE.Vector3(0, 0, 6)
+            ]);
+            const imagAxisMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 3 });
+            const imagAxis = new THREE.Line(imagAxisGeometry, imagAxisMaterial);
+            scene.add(imagAxis);
+            
+            // Unit circle
+            const circleGeometry = new THREE.CircleGeometry(1, 64);
+            const edges = new THREE.EdgesGeometry(circleGeometry);
+            const circleLine = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ 
+                color: 0xffff00, 
+                transparent: true, 
+                opacity: 0.5 
+            }));
+            circleLine.rotation.x = -Math.PI / 2;
+            scene.add(circleLine);
+            
+            // Axis labels
+            createLabel('Real', 6.5, 0, 0, 0xff0000);
+            createLabel('Imaginary', 0, 0, 6.5, 0x00ff00);
+        }
+        
+        function createLabel(text, x, y, z, color) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 128;
+            context.fillStyle = '#' + color.toString(16).padStart(6, '0');
+            context.font = 'Bold 48px Arial';
+            context.fillText(text, 10, 80);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.position.set(x, y, z);
+            sprite.scale.set(2, 1, 1);
+            scene.add(sprite);
+        }
+        
+        function createComplexNumber() {
+            // Main vector (blue)
+            const arrowHelper = new THREE.ArrowHelper(
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(0, 0, 0),
+                1,
+                0x0088ff,
+                0.5,
+                0.3
+            );
+            complexVector = arrowHelper;
+            scene.add(complexVector);
+            
+            // Real component (red dashed)
+            const realGeometry = new THREE.BufferGeometry();
+            const realMaterial = new THREE.LineDashedMaterial({ 
+                color: 0xff0000, 
+                linewidth: 2,
+                dashSize: 0.2,
+                gapSize: 0.1
+            });
+            realComponent = new THREE.Line(realGeometry, realMaterial);
+            scene.add(realComponent);
+            
+            // Imaginary component (green dashed)
+            const imagGeometry = new THREE.BufferGeometry();
+            const imagMaterial = new THREE.LineDashedMaterial({ 
+                color: 0x00ff00, 
+                linewidth: 2,
+                dashSize: 0.2,
+                gapSize: 0.1
+            });
+            imagComponent = new THREE.Line(imagGeometry, imagMaterial);
+            scene.add(imagComponent);
+            
+            // Angle arc
+            const arcCurve = new THREE.EllipseCurve(
+                0, 0,
+                1, 1,
+                0, Math.PI/4,
+                false,
+                0
+            );
+            const arcPoints = arcCurve.getPoints(50);
+            const arcGeometry = new THREE.BufferGeometry().setFromPoints(
+                arcPoints.map(p => new THREE.Vector3(p.x, 0, p.y))
+            );
+            const arcMaterial = new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 2 });
+            angleArc = new THREE.Line(arcGeometry, arcMaterial);
+            scene.add(angleArc);
+            
+            // Point at end
+            const pointGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+            const pointMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xffff00,
+                emissive: 0xffaa00
+            });
+            const point = new THREE.Mesh(pointGeometry, pointMaterial);
+            scene.add(point);
+            complexVector.userData.point = point;
+            
+            updateComplexNumber();
+        }
+        
+        function updateComplexNumber() {
+            const r = Math.sqrt(realValue * realValue + imagValue * imagValue);
+            const theta = Math.atan2(imagValue, realValue);
+            
+            // Update main vector
+            const direction = new THREE.Vector3(realValue, 0, imagValue).normalize();
+            complexVector.setDirection(direction);
+            complexVector.setLength(r, r * 0.2, r * 0.15);
+            
+            // Update point
+            complexVector.userData.point.position.set(realValue, 0, imagValue);
+            
+            // Update real component
+            const realPoints = [
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(realValue, 0, 0)
+            ];
+            realComponent.geometry.setFromPoints(realPoints);
+            realComponent.computeLineDistances();
+            
+            // Update imaginary component
+            const imagPoints = [
+                new THREE.Vector3(realValue, 0, 0),
+                new THREE.Vector3(realValue, 0, imagValue)
+            ];
+            imagComponent.geometry.setFromPoints(imagPoints);
+            imagComponent.computeLineDistances();
+            
+            // Update angle arc
+            const arcCurve = new THREE.EllipseCurve(
+                0, 0,
+                Math.min(r * 0.3, 1), Math.min(r * 0.3, 1),
+                0, theta,
+                false,
+                0
+            );
+            const arcPoints = arcCurve.getPoints(50);
+            angleArc.geometry.setFromPoints(
+                arcPoints.map(p => new THREE.Vector3(p.x, 0, p.y))
+            );
+            
+            updateDisplay();
+        }
+        
+        function updateDisplay() {
+            const r = Math.sqrt(realValue * realValue + imagValue * imagValue);
+            const theta = Math.atan2(imagValue, realValue);
+            const thetaDeg = theta * 180 / Math.PI;
+            
+            document.getElementById('real-value').textContent = realValue.toFixed(1);
+            document.getElementById('imag-value').textContent = imagValue.toFixed(1);
+            
+            const sign = imagValue >= 0 ? '+' : '';
+            document.getElementById('cartesian-form').textContent = 
+                `${realValue.toFixed(1)} ${sign} ${imagValue.toFixed(1)}i`;
+            
+            document.getElementById('magnitude').textContent = r.toFixed(2);
+            document.getElementById('argument').textContent = `${thetaDeg.toFixed(1)}°`;
+            document.getElementById('polar-form').textContent = `${r.toFixed(2)}∠${thetaDeg.toFixed(1)}°`;
+            document.getElementById('exponential-form').textContent = `${r.toFixed(2)}e^(i${theta.toFixed(2)})`;
+        }
+        
+        function setupControls() {
+            const realSlider = document.getElementById('real-slider');
+            const imagSlider = document.getElementById('imag-slider');
+            
+            realSlider.addEventListener('input', (e) => {
+                realValue = parseFloat(e.target.value);
+                updateComplexNumber();
+            });
+            
+            imagSlider.addEventListener('input', (e) => {
+                imagValue = parseFloat(e.target.value);
+                updateComplexNumber();
+            });
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Gentle camera rotation
+            const time = Date.now() * 0.0001;
+            camera.position.x = 10 * Math.cos(time);
+            camera.position.z = 10 * Math.sin(time);
+            camera.lookAt(0, 0, 0);
+            
+            renderer.render(scene, camera);
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
