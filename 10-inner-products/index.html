@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10 - Inner Products and Complex Conjugation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        #canvas-container {
+            height: 600px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #ffd700;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+        
+        .value-display {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-left: 15px;
+            font-family: 'Courier New', monospace;
+            min-width: 100px;
+        }
+        
+        .result-box {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .example-box {
+            background: rgba(135, 206, 235, 0.1);
+            border-left: 4px solid #87ceeb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⟨ψ|φ⟩ Inner Products and Complex Conjugation</h1>
+            <p>The Foundation of Quantum Mechanics</p>
+        </header>
+        
+        <div id="canvas-container"></div>
+        
+        <div class="controls">
+            <h2>Interactive Inner Product Calculator</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div>
+                    <h3>Vector |ψ⟩</h3>
+                    <div class="control-group">
+                        <label>ψ₁ Real: <span class="value-display" id="psi1-real-val">1.0</span></label>
+                        <input type="range" id="psi1-real" min="-2" max="2" step="0.1" value="1">
+                    </div>
+                    <div class="control-group">
+                        <label>ψ₁ Imaginary: <span class="value-display" id="psi1-imag-val">0.0</span></label>
+                        <input type="range" id="psi1-imag" min="-2" max="2" step="0.1" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label>ψ₂ Real: <span class="value-display" id="psi2-real-val">0.0</span></label>
+                        <input type="range" id="psi2-real" min="-2" max="2" step="0.1" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label>ψ₂ Imaginary: <span class="value-display" id="psi2-imag-val">1.0</span></label>
+                        <input type="range" id="psi2-imag" min="-2" max="2" step="0.1" value="1">
+                    </div>
+                </div>
+                <div>
+                    <h3>Vector |φ⟩</h3>
+                    <div class="control-group">
+                        <label>φ₁ Real: <span class="value-display" id="phi1-real-val">0.707</span></label>
+                        <input type="range" id="phi1-real" min="-2" max="2" step="0.1" value="0.707">
+                    </div>
+                    <div class="control-group">
+                        <label>φ₁ Imaginary: <span class="value-display" id="phi1-imag-val">0.0</span></label>
+                        <input type="range" id="phi1-imag" min="-2" max="2" step="0.1" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label>φ₂ Real: <span class="value-display" id="phi2-real-val">0.707</span></label>
+                        <input type="range" id="phi2-real" min="-2" max="2" step="0.1" value="0.707">
+                    </div>
+                    <div class="control-group">
+                        <label>φ₂ Imaginary: <span class="value-display" id="phi2-imag-val">0.0</span></label>
+                        <input type="range" id="phi2-imag" min="-2" max="2" step="0.1" value="0">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-box">
+                <strong>Inner Product ⟨ψ|φ⟩ = </strong><span id="inner-product-result">0.707 + 0.707i</span>
+            </div>
+            
+            <div class="result-box" style="background: rgba(255, 165, 0, 0.1); border-color: rgba(255, 165, 0, 0.3);">
+                <strong>|⟨ψ|φ⟩|² = </strong><span id="overlap-result">1.000</span>
+                <br><small>(Probability of measuring |φ⟩ when in state |ψ⟩)</small>
+            </div>
+        </div>
+        
+        <div class="content-grid">
+            <div class="panel">
+                <h2>Inner Product Definition</h2>
+                <p>The <span class="highlight">inner product</span> (or dot product) of two complex vectors is:</p>
+                
+                <div class="formula">
+                    ⟨ψ|φ⟩ = Σᵢ ψᵢ* φᵢ
+                </div>
+                
+                <p>Where ψᵢ* is the complex conjugate of ψᵢ.</p>
+                
+                <h3>For Two-Dimensional Vectors</h3>
+                <div class="formula">
+                    ⟨ψ|φ⟩ = ψ₁*φ₁ + ψ₂*φ₂
+                </div>
+                
+                <div class="example-box">
+                    <h3>Example</h3>
+                    <p>|ψ⟩ = (1, i)</p>
+                    <p>|φ⟩ = (1/√2, 1/√2)</p>
+                    <p></p>
+                    <p>⟨ψ|φ⟩ = 1* · (1/√2) + i* · (1/√2)</p>
+                    <p>= 1 · (1/√2) + (−i) · (1/√2)</p>
+                    <p>= (1/√2) − (i/√2)</p>
+                    <p>= (1 − i)/√2</p>
+                </div>
+                
+                <h3>Key Properties</h3>
+                <ul>
+                    <li><strong>Conjugate symmetry:</strong> ⟨ψ|φ⟩ = ⟨φ|ψ⟩*</li>
+                    <li><strong>Linearity:</strong> ⟨ψ|aφ₁ + bφ₂⟩ = a⟨ψ|φ₁⟩ + b⟨ψ|φ₂⟩</li>
+                    <li><strong>Positive definite:</strong> ⟨ψ|ψ⟩ ≥ 0</li>
+                    <li><strong>Norm:</strong> ||ψ|| = √⟨ψ|ψ⟩</li>
+                </ul>
+            </div>
+            
+            <div class="panel">
+                <h2>Complex Conjugation</h2>
+                <p>The <span class="highlight">complex conjugate</span> is essential for inner products:</p>
+                
+                <div class="formula">
+                    If z = a + bi, then z* = a − bi
+                </div>
+                
+                <h3>Why Conjugate?</h3>
+                <p>Without conjugation, the inner product wouldn't satisfy key properties:</p>
+                
+                <div class="example-box">
+                    <h3>Without Conjugation (Wrong!)</h3>
+                    <p>|ψ⟩ = (i, 0)</p>
+                    <p>⟨ψ|ψ⟩ = i·i + 0·0 = −1 (negative!)</p>
+                    <p>This violates positive definiteness!</p>
+                </div>
+                
+                <div class="example-box">
+                    <h3>With Conjugation (Correct!)</h3>
+                    <p>|ψ⟩ = (i, 0)</p>
+                    <p>⟨ψ|ψ⟩ = (−i)·i + 0·0 = 1 (positive!)</p>
+                    <p>This gives the correct norm!</p>
+                </div>
+                
+                <h3>Properties of Conjugation</h3>
+                <ul>
+                    <li>(z*)* = z (double conjugation)</li>
+                    <li>(z + w)* = z* + w*</li>
+                    <li>(zw)* = z*w*</li>
+                    <li>z·z* = |z|² (always real and positive)</li>
+                </ul>
+            </div>
+            
+            <div class="panel">
+                <h2>Bra-Ket Notation</h2>
+                <p>Dirac's <span class="highlight">bra-ket notation</span> elegantly represents inner products:</p>
+                
+                <h3>Kets (Column Vectors)</h3>
+                <div class="formula">
+                    |φ⟩ = [φ₁]
+                          [φ₂]
+                </div>
+                <p>A ket represents a quantum state.</p>
+                
+                <h3>Bras (Row Vectors)</h3>
+                <div class="formula">
+                    ⟨ψ| = [ψ₁* ψ₂*]
+                </div>
+                <p>A bra is the conjugate transpose of a ket.</p>
+                
+                <h3>Inner Product</h3>
+                <div class="formula">
+                    ⟨ψ|φ⟩ = [ψ₁* ψ₂*] [φ₁] = ψ₁*φ₁ + ψ₂*φ₂
+                                        [φ₂]
+                </div>
+                
+                <div class="example-box">
+                    <h3>Standard Basis</h3>
+                    <p>|0⟩ = (1, 0) and |1⟩ = (0, 1)</p>
+                    <p>⟨0|0⟩ = 1 (orthonormal)</p>
+                    <p>⟨1|1⟩ = 1 (orthonormal)</p>
+                    <p>⟨0|1⟩ = 0 (orthogonal)</p>
+                    <p>⟨1|0⟩ = 0 (orthogonal)</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Orthogonality</h2>
+                <p>Two vectors are <span class="highlight">orthogonal</span> if their inner product is zero:</p>
+                
+                <div class="formula">
+                    ⟨ψ|φ⟩ = 0 ⟺ |ψ⟩ ⊥ |φ⟩
+                </div>
+                
+                <h3>Orthonormal Basis</h3>
+                <p>A set of vectors {|eᵢ⟩} is orthonormal if:</p>
+                <div class="formula">
+                    ⟨eᵢ|eⱼ⟩ = δᵢⱼ
+                </div>
+                <p>Where δᵢⱼ is the Kronecker delta (1 if i=j, 0 otherwise).</p>
+                
+                <div class="example-box">
+                    <h3>Example: Hadamard Basis</h3>
+                    <p>|+⟩ = (1/√2)(|0⟩ + |1⟩) = (1/√2, 1/√2)</p>
+                    <p>|−⟩ = (1/√2)(|0⟩ − |1⟩) = (1/√2, −1/√2)</p>
+                    <p></p>
+                    <p>⟨+|+⟩ = 1/2 + 1/2 = 1 ✓</p>
+                    <p>⟨−|−⟩ = 1/2 + 1/2 = 1 ✓</p>
+                    <p>⟨+|−⟩ = 1/2 − 1/2 = 0 ✓</p>
+                    <p>Orthonormal!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Quantum Computing Applications</h2>
+            
+            <h3>1. Measurement Probabilities</h3>
+            <p>The probability of measuring state |φ⟩ when the system is in state |ψ⟩:</p>
+            <div class="formula">
+                P(φ|ψ) = |⟨φ|ψ⟩|²
+            </div>
+            <p>This is the <span class="highlight">Born rule</span>!</p>
+            
+            <h3>2. State Overlap</h3>
+            <p>The inner product measures how "similar" two quantum states are:</p>
+            <ul>
+                <li>|⟨ψ|φ⟩| = 1: States are identical (up to phase)</li>
+                <li>|⟨ψ|φ⟩| = 0: States are orthogonal (distinguishable)</li>
+                <li>0 < |⟨ψ|φ⟩| < 1: Partial overlap</li>
+            </ul>
+            
+            <h3>3. Expectation Values</h3>
+            <p>The expected value of an observable A in state |ψ⟩:</p>
+            <div class="formula">
+                ⟨A⟩ = ⟨ψ|A|ψ⟩
+            </div>
+            
+            <h3>4. Fidelity</h3>
+            <p>The fidelity between two quantum states:</p>
+            <div class="formula">
+                F(ψ, φ) = |⟨ψ|φ⟩|²
+            </div>
+            <p>Used to measure quality of quantum operations!</p>
+            
+            <div class="example-box">
+                <h3>Example: Measuring |+⟩ in Computational Basis</h3>
+                <p>|ψ⟩ = |+⟩ = (1/√2)(|0⟩ + |1⟩)</p>
+                <p></p>
+                <p>P(0) = |⟨0|+⟩|² = |(1/√2)|² = 1/2</p>
+                <p>P(1) = |⟨1|+⟩|² = |(1/√2)|² = 1/2</p>
+                <p></p>
+                <p>Equal probability of measuring 0 or 1!</p>
+            </div>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="../09-probability-amplitudes/index.html" class="btn">← Previous: Probability Amplitudes</a>
+            <a href="../index.html" class="btn">Home</a>
+            <a href="../11-quantum-gates/index.html" class="btn">Next: Quantum Gates →</a>
+        </div>
+    </div>
+    
+    <script>
+        let scene, camera, renderer;
+        let psiVector, phiVector, conjugateVector;
+        
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+            
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(5, 5, 5);
+            camera.lookAt(0, 0, 0);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            createScene();
+            
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const pointLight = new THREE.PointLight(0xffffff, 0.8, 100);
+            pointLight.position.set(10, 10, 10);
+            scene.add(pointLight);
+            
+            setupControls();
+            
+            window.addEventListener('resize', onWindowResize, false);
+            
+            animate();
+        }
+        
+        function createScene() {
+            const gridHelper = new THREE.GridHelper(10, 10, 0x444444, 0x222222);
+            scene.add(gridHelper);
+            
+            const axesHelper = new THREE.AxesHelper(5);
+            scene.add(axesHelper);
+            
+            psiVector = createVector(0x00aaff);
+            phiVector = createVector(0xff00aa);
+            conjugateVector = createVector(0x00ff00);
+            
+            updateVectors();
+        }
+        
+        function createVector(color) {
+            const group = new THREE.Group();
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(1, 0, 0)
+            ]);
+            
+            const line = new THREE.Line(
+                geometry,
+                new THREE.LineBasicMaterial({ color: color, linewidth: 3 })
+            );
+            group.add(line);
+            
+            const coneGeometry = new THREE.ConeGeometry(0.1, 0.3, 16);
+            const coneMaterial = new THREE.MeshPhongMaterial({ color: color });
+            const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+            cone.position.set(1, 0, 0);
+            cone.rotation.z = -Math.PI / 2;
+            group.add(cone);
+            
+            scene.add(group);
+            return group;
+        }
+        
+        function setupControls() {
+            const controls = [
+                'psi1-real', 'psi1-imag', 'psi2-real', 'psi2-imag',
+                'phi1-real', 'phi1-imag', 'phi2-real', 'phi2-imag'
+            ];
+            
+            controls.forEach(id => {
+                const slider = document.getElementById(id);
+                const display = document.getElementById(id + '-val');
+                
+                slider.addEventListener('input', () => {
+                    display.textContent = parseFloat(slider.value).toFixed(1);
+                    updateVectors();
+                    calculateInnerProduct();
+                });
+            });
+            
+            calculateInnerProduct();
+        }
+        
+        function updateVectors() {
+            const psi1r = parseFloat(document.getElementById('psi1-real').value);
+            const psi1i = parseFloat(document.getElementById('psi1-imag').value);
+            const psi2r = parseFloat(document.getElementById('psi2-real').value);
+            const psi2i = parseFloat(document.getElementById('psi2-imag').value);
+            
+            const phi1r = parseFloat(document.getElementById('phi1-real').value);
+            const phi1i = parseFloat(document.getElementById('phi1-imag').value);
+            const phi2r = parseFloat(document.getElementById('phi2-real').value);
+            const phi2i = parseFloat(document.getElementById('phi2-imag').value);
+            
+            updateVectorPosition(psiVector, psi1r, psi1i, psi2r, psi2i);
+            updateVectorPosition(phiVector, phi1r, phi1i, phi2r, phi2i);
+            updateVectorPosition(conjugateVector, psi1r, -psi1i, psi2r, -psi2i);
+        }
+        
+        function updateVectorPosition(vector, r1, i1, r2, i2) {
+            const magnitude = Math.sqrt(r1*r1 + i1*i1 + r2*r2 + i2*i2);
+            const scale = magnitude > 0 ? magnitude : 0.1;
+            
+            vector.scale.set(scale, scale, scale);
+            
+            const angle = Math.atan2(i1, r1);
+            vector.rotation.y = angle;
+        }
+        
+        function calculateInnerProduct() {
+            const psi1r = parseFloat(document.getElementById('psi1-real').value);
+            const psi1i = parseFloat(document.getElementById('psi1-imag').value);
+            const psi2r = parseFloat(document.getElementById('psi2-real').value);
+            const psi2i = parseFloat(document.getElementById('psi2-imag').value);
+            
+            const phi1r = parseFloat(document.getElementById('phi1-real').value);
+            const phi1i = parseFloat(document.getElementById('phi1-imag').value);
+            const phi2r = parseFloat(document.getElementById('phi2-real').value);
+            const phi2i = parseFloat(document.getElementById('phi2-imag').value);
+            
+            // Inner product: ⟨ψ|φ⟩ = ψ₁*φ₁ + ψ₂*φ₂
+            // Complex conjugate: (a + bi)* = a - bi
+            // Complex multiplication: (a + bi)(c + di) = (ac - bd) + (ad + bc)i
+            
+            // ψ₁* = psi1r - psi1i*i
+            // ψ₁*φ₁ = (psi1r - psi1i*i)(phi1r + phi1i*i)
+            const term1r = psi1r * phi1r + psi1i * phi1i;
+            const term1i = psi1r * phi1i - psi1i * phi1r;
+            
+            // ψ₂*φ₂
+            const term2r = psi2r * phi2r + psi2i * phi2i;
+            const term2i = psi2r * phi2i - psi2i * phi2r;
+            
+            const innerR = term1r + term2r;
+            const innerI = term1i + term2i;
+            
+            const magnitude = Math.sqrt(innerR * innerR + innerI * innerI);
+            const overlap = magnitude * magnitude;
+            
+            document.getElementById('inner-product-result').textContent = 
+                `${innerR.toFixed(3)} ${innerI >= 0 ? '+' : ''}${innerI.toFixed(3)}i`;
+            
+            document.getElementById('overlap-result').textContent = overlap.toFixed(3);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const time = Date.now() * 0.001;
+            psiVector.position.y = Math.sin(time) * 0.3;
+            phiVector.position.y = Math.cos(time) * 0.3;
+            
+            renderer.render(scene, camera);
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
