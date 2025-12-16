@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13 - Exercises: Complex Numbers in Quantum Computing</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .exercise {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        .exercise-header {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #ffd700;
+        }
+        
+        h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        
+        h3 {
+            color: #87ceeb;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+        
+        .problem {
+            background: rgba(135, 206, 235, 0.1);
+            border-left: 4px solid #87ceeb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-size: 1.1em;
+        }
+        
+        .solution {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            text-align: center;
+            margin: 15px 0;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .step {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 3px solid #ffd700;
+        }
+        
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .canvas-container {
+            height: 400px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 Exercises: Complex Numbers in Quantum Computing</h1>
+            <p>Comprehensive Solutions with Visualizations</p>
+        </header>
+        
+        <!-- Exercise 1 -->
+        <div class="exercise">
+            <div class="exercise-header">
+                <h2>Exercise 1: Complex Number Arithmetic</h2>
+            </div>
+            
+            <div class="problem">
+                <strong>Problem:</strong> Given z₁ = 3 + 4i and z₂ = 1 − 2i, calculate:
+                <ul>
+                    <li>a) z₁ + z₂</li>
+                    <li>b) z₁ − z₂</li>
+                    <li>c) z₁ · z₂</li>
+                    <li>d) z₁ / z₂</li>
+                </ul>
+            </div>
+            
+            <div class="solution">
+                <h3>Solution:</h3>
+                
+                <div class="step">
+                    <strong>a) Addition: z₁ + z₂</strong>
+                    <div class="formula">
+                        z₁ + z₂ = (3 + 4i) + (1 − 2i)<br>
+                        = (3 + 1) + (4 − 2)i<br>
+                        = 4 + 2i
+                    </div>
+                    <p>Add real parts and imaginary parts separately.</p>
+                </div>
+                
+                <div class="step">
+                    <strong>b) Subtraction: z₁ − z₂</strong>
+                    <div class="formula">
+                        z₁ − z₂ = (3 + 4i) − (1 − 2i)<br>
+                        = (3 − 1) + (4 − (−2))i<br>
+                        = 2 + 6i
+                    </div>
+                    <p>Subtract real parts and imaginary parts separately.</p>
+                </div>
+                
+                <div class="step">
+                    <strong>c) Multiplication: z₁ · z₂</strong>
+                    <div class="formula">
+                        z₁ · z₂ = (3 + 4i)(1 − 2i)<br>
+                        = 3·1 + 3·(−2i) + 4i·1 + 4i·(−2i)<br>
+                        = 3 − 6i + 4i − 8i²<br>
+                        = 3 − 2i − 8(−1)<br>
+                        = 3 − 2i + 8<br>
+                        = 11 − 2i
+                    </div>
+                    <p>Use FOIL method and remember i² = −1.</p>
+                </div>
+                
+                <div class="step">
+                    <strong>d) Division: z₁ / z₂</strong>
+                    <div class="formula">
+                        z₁ / z₂ = (3 + 4i) / (1 − 2i)<br>
+                        = (3 + 4i)(1 + 2i) / [(1 − 2i)(1 + 2i)]<br>
+                        = (3 + 6i + 4i + 8i²) / (1 − 4i²)<br>
+                        = (3 + 10i − 8) / (1 + 4)<br>
+                        = (−5 + 10i) / 5<br>
+                        = −1 + 2i
+                    </div>
+                    <p>Multiply by conjugate of denominator.</p>
+                </div>
+            </div>
+            
+            <div class="canvas-container" id="canvas1"></div>
+        </div>
+        
+        <!-- Exercise 2 -->
+        <div class="exercise">
+            <div class="exercise-header">
+                <h2>Exercise 2: Magnitude and Phase</h2>
+            </div>
+            
+            <div class="problem">
+                <strong>Problem:</strong> For z = 1 + i√3, find:
+                <ul>
+                    <li>a) The magnitude |z|</li>
+                    <li>b) The argument (phase) arg(z)</li>
+                    <li>c) Express z in polar form</li>
+                    <li>d) Express z using Euler's formula</li>
+                </ul>
+            </div>
+            
+            <div class="solution">
+                <h3>Solution:</h3>
+                
+                <div class="step">
+                    <strong>a) Magnitude: |z|</strong>
+                    <div class="formula">
+                        |z| = √(a² + b²)<br>
+                        = √(1² + (√3)²)<br>
+                        = √(1 + 3)<br>
+                        = √4<br>
+                        = 2
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <strong>b) Argument: arg(z)</strong>
+                    <div class="formula">
+                        arg(z) = arctan(b/a)<br>
+                        = arctan(√3/1)<br>
+                        = arctan(√3)<br>
+                        = π/3 (60°)
+                    </div>
+                    <p>Since both a and b are positive, z is in the first quadrant.</p>
+                </div>
+                
+                <div class="step">
+                    <strong>c) Polar form:</strong>
+                    <div class="formula">
+                        z = r(cos θ + i sin θ)<br>
+                        = 2(cos(π/3) + i sin(π/3))<br>
+                        = 2(1/2 + i√3/2)<br>
+                        = 1 + i√3 ✓
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <strong>d) Euler's formula:</strong>
+                    <div class="formula">
+                        z = re^(iθ)<br>
+                        = 2e^(iπ/3)
+                    </div>
+                    <p>This is the most compact form!</p>
+                </div>
+            </div>
+            
+            <div class="canvas-container" id="canvas2"></div>
+        </div>
+        
+        <!-- Exercise 3 -->
+        <div class="exercise">
+            <div class="exercise-header">
+                <h2>Exercise 3: Quantum State Representation</h2>
+            </div>
+            
+            <div class="problem">
+                <strong>Problem:</strong> A qubit is in the state |ψ⟩ = (1/√2)|0⟩ + (i/√2)|1⟩.
+                <ul>
+                    <li>a) Verify this is a valid quantum state</li>
+                    <li>b) Find the probability of measuring |0⟩</li>
+                    <li>c) Find the probability of measuring |1⟩</li>
+                    <li>d) Represent this state on the Bloch sphere</li>
+                </ul>
+            </div>
+            
+            <div class="solution">
+                <h3>Solution:</h3>
+                
+                <div class="step">
+                    <strong>a) Verify normalization:</strong>
+                    <div class="formula">
+                        ||ψ||² = |α|² + |β|²<br>
+                        = |1/√2|² + |i/√2|²<br>
+                        = 1/2 + 1/2<br>
+                        = 1 ✓
+                    </div>
+                    <p>The state is normalized, so it's valid!</p>
+                </div>
+                
+                <div class="step">
+                    <strong>b) Probability of |0⟩:</strong>
+                    <div class="formula">
+                        P(0) = |α|²<br>
+                        = |1/√2|²<br>
+                        = 1/2<br>
+                        = 0.5 (50%)
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <strong>c) Probability of |1⟩:</strong>
+                    <div class="formula">
+                        P(1) = |β|²<br>
+                        = |i/√2|²<br>
+                        = 1/2<br>
+                        = 0.5 (50%)
+                    </div>
+                    <p>Equal probabilities, but different phase!</p>
+                </div>
+                
+                <div class="step">
+                    <strong>d) Bloch sphere representation:</strong>
+                    <div class="formula">
+                        |ψ⟩ = cos(θ/2)|0⟩ + e^(iφ)sin(θ/2)|1⟩<br>
+                        <br>
+                        cos(θ/2) = 1/√2 → θ = π/2<br>
+                        e^(iφ)sin(θ/2) = i/√2 → φ = π/2<br>
+                        <br>
+                        Position: (0, 1, 0) = |i⟩ state
+                    </div>
+                    <p>This is the |i⟩ state on the equator!</p>
+                </div>
+            </div>
+            
+            <div class="canvas-container" id="canvas3"></div>
+        </div>
+        
+        <!-- Exercise 4 -->
+        <div class="exercise">
+            <div class="exercise-header">
+                <h2>Exercise 4: Quantum Gate Application</h2>
+            </div>
+            
+            <div class="problem">
+                <strong>Problem:</strong> Apply the Hadamard gate followed by the S gate to |0⟩.
+                <ul>
+                    <li>a) Calculate H|0⟩</li>
+                    <li>b) Calculate S(H|0⟩)</li>
+                    <li>c) Verify the result is normalized</li>
+                    <li>d) Find measurement probabilities</li>
+                </ul>
+            </div>
+            
+            <div class="solution">
+                <h3>Solution:</h3>
+                
+                <div class="step">
+                    <strong>a) Apply Hadamard gate:</strong>
+                    <div class="formula">
+                        H = (1/√2)[1  1]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[1 −1]<br>
+                        <br>
+                        H|0⟩ = (1/√2)[1  1][1]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[1 −1][0]<br>
+                        <br>
+                        = (1/√2)[1] = (1/√2)(|0⟩ + |1⟩) = |+⟩<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[1]
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <strong>b) Apply S gate:</strong>
+                    <div class="formula">
+                        S = [1  0]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;[0  i]<br>
+                        <br>
+                        S|+⟩ = (1/√2)S(|0⟩ + |1⟩)<br>
+                        = (1/√2)(|0⟩ + i|1⟩)<br>
+                        = |i⟩
+                    </div>
+                    <p>The S gate adds a phase of π/2 to |1⟩!</p>
+                </div>
+                
+                <div class="step">
+                    <strong>c) Verify normalization:</strong>
+                    <div class="formula">
+                        ||i||² = |1/√2|² + |i/√2|²<br>
+                        = 1/2 + 1/2<br>
+                        = 1 ✓
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <strong>d) Measurement probabilities:</strong>
+                    <div class="formula">
+                        P(0) = |1/√2|² = 1/2 = 50%<br>
+                        P(1) = |i/√2|² = 1/2 = 50%
+                    </div>
+                    <p>Same as |+⟩, but with different phase!</p>
+                </div>
+            </div>
+            
+            <div class="canvas-container" id="canvas4"></div>
+        </div>
+        
+        <!-- Exercise 5 -->
+        <div class="exercise">
+            <div class="exercise-header">
+                <h2>Exercise 5: Inner Product and Orthogonality</h2>
+            </div>
+            
+            <div class="problem">
+                <strong>Problem:</strong> Given |ψ⟩ = (3 + 4i)|0⟩ + (1 − 2i)|1⟩ and |φ⟩ = (1 + i)|0⟩ + (2 − i)|1⟩:
+                <ul>
+                    <li>a) Normalize both states</li>
+                    <li>b) Calculate ⟨ψ|φ⟩</li>
+                    <li>c) Calculate |⟨ψ|φ⟩|²</li>
+                    <li>d) Are these states orthogonal?</li>
+                </ul>
+            </div>
+            
+            <div class="solution">
+                <h3>Solution:</h3>
+                
+                <div class="step">
+                    <strong>a) Normalize states:</strong>
+                    <div class="formula">
+                        ||ψ|| = √(|3+4i|² + |1−2i|²)<br>
+                        = √(9+16 + 1+4)<br>
+                        = √30<br>
+                        <br>
+                        |ψ⟩ₙ = (1/√30)[(3+4i)|0⟩ + (1−2i)|1⟩]<br>
+                        <br>
+                        ||φ|| = √(|1+i|² + |2−i|²)<br>
+                        = √(2 + 5)<br>
+                        = √7<br>
+                        <br>
+                        |φ⟩ₙ = (1/√7)[(1+i)|0⟩ + (2−i)|1⟩]
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <strong>b) Calculate inner product:</strong>
+                    <div class="formula">
+                        ⟨ψ|φ⟩ = (1/√210)[ψ₁*φ₁ + ψ₂*φ₂]<br>
+                        <br>
+                        ψ₁* = 3 − 4i, φ₁ = 1 + i<br>
+                        ψ₁*φ₁ = (3−4i)(1+i) = 3+3i−4i−4i²<br>
+                        = 3−i+4 = 7−i<br>
+                        <br>
+                        ψ₂* = 1 + 2i, φ₂ = 2 − i<br>
+                        ψ₂*φ₂ = (1+2i)(2−i) = 2−i+4i−2i²<br>
+                        = 2+3i+2 = 4+3i<br>
+                        <br>
+                        ⟨ψ|φ⟩ = (1/√210)(7−i+4+3i)<br>
+                        = (11+2i)/√210
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <strong>c) Calculate overlap:</strong>
+                    <div class="formula">
+                        |⟨ψ|φ⟩|² = |11+2i|²/210<br>
+                        = (121+4)/210<br>
+                        = 125/210<br>
+                        ≈ 0.595
+                    </div>
+                    <p>This is the fidelity between the states!</p>
+                </div>
+                
+                <div class="step">
+                    <strong>d) Orthogonality:</strong>
+                    <div class="formula">
+                        ⟨ψ|φ⟩ ≠ 0
+                    </div>
+                    <p><span class="highlight">No</span>, these states are not orthogonal. They have significant overlap (59.5%).</p>
+                </div>
+            </div>
+            
+            <div class="canvas-container" id="canvas5"></div>
+        </div>
+        
+        <div class="exercise">
+            <h2>Summary</h2>
+            <p>These exercises demonstrate the essential role of complex numbers in quantum computing:</p>
+            <ul>
+                <li><strong>Exercise 1:</strong> Complex arithmetic is fundamental for quantum state manipulation</li>
+                <li><strong>Exercise 2:</strong> Polar form and Euler's formula provide geometric insight</li>
+                <li><strong>Exercise 3:</strong> Complex amplitudes encode both probability and phase</li>
+                <li><strong>Exercise 4:</strong> Quantum gates use complex coefficients for phase control</li>
+                <li><strong>Exercise 5:</strong> Inner products with complex conjugation measure state overlap</li>
+            </ul>
+            <p style="margin-top: 20px;">All these concepts rely on <span class="highlight">complex numbers</span> to work correctly!</p>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="../12-bloch-sphere/index.html" class="btn">← Previous: Bloch Sphere</a>
+            <a href="../index.html" class="btn">Home</a>
+            <a href="../14-summary/index.html" class="btn">Next: Summary →</a>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize all visualizations
+        function initCanvas(canvasId, exerciseNum) {
+            const container = document.getElementById(canvasId);
+            if (!container) return;
+            
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+            
+            const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(3, 3, 5);
+            camera.lookAt(0, 0, 0);
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const pointLight = new THREE.PointLight(0xffffff, 0.8, 100);
+            pointLight.position.set(10, 10, 10);
+            scene.add(pointLight);
+            
+            // Create visualization based on exercise
+            createVisualization(scene, exerciseNum);
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+        
+        function createVisualization(scene, exerciseNum) {
+            const gridHelper = new THREE.GridHelper(10, 10, 0x444444, 0x222222);
+            scene.add(gridHelper);
+            
+            const axesHelper = new THREE.AxesHelper(3);
+            scene.add(axesHelper);
+            
+            // Add exercise-specific visualization
+            if (exerciseNum === 1) {
+                // Show complex number arithmetic
+                addVector(scene, 3, 4, 0x00aaff);
+                addVector(scene, 1, -2, 0xff00aa);
+                addVector(scene, 4, 2, 0x00ff00);
+            } else if (exerciseNum === 2) {
+                // Show magnitude and phase
+                addVector(scene, 1, Math.sqrt(3), 0xffaa00);
+            } else if (exerciseNum === 3) {
+                // Show quantum state
+                addVector(scene, 1/Math.sqrt(2), 0, 0x00aaff);
+                addVector(scene, 0, 1/Math.sqrt(2), 0xff00aa);
+            } else if (exerciseNum === 4) {
+                // Show gate operations
+                addVector(scene, 1/Math.sqrt(2), 1/Math.sqrt(2), 0x00ff00);
+            } else if (exerciseNum === 5) {
+                // Show inner product
+                addVector(scene, 3, 4, 0x00aaff);
+                addVector(scene, 1, 1, 0xff00aa);
+            }
+        }
+        
+        function addVector(scene, x, y, color) {
+            const geometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(x, 0, y)
+            ]);
+            
+            const line = new THREE.Line(
+                geometry,
+                new THREE.LineBasicMaterial({ color: color, linewidth: 3 })
+            );
+            scene.add(line);
+            
+            const sphereGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+            const sphereMaterial = new THREE.MeshPhongMaterial({ color: color });
+            const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            sphere.position.set(x, 0, y);
+            scene.add(sphere);
+        }
+        
+        // Initialize all canvases
+        window.addEventListener('load', () => {
+            for (let i = 1; i <= 5; i++) {
+                initCanvas('canvas' + i, i);
+            }
+        });
+    </script>
+</body>
+</html>
